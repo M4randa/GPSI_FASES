@@ -14,8 +14,6 @@ projeto/
 ├── artistas.py          # CRUD e menu da entidade Artista
 ├── utilizadores.py      # CRUD e menu da entidade Utilizador
 ├── utils.py             # Funções de validação partilhadas
-├── artistas.json        # Base de dados persistente dos artistas
-└── utilizadores.json    # Base de dados persistente dos utilizadores
 ```
 
 ---
@@ -99,17 +97,11 @@ Todas as entradas do utilizador são validadas antes de serem guardadas:
 | Estado da conta | `ativo`, `inativo` ou `premium` |
 
 ---
-
-## 💾 Persistência de Dados
-
-Os dados são guardados automaticamente em JSON após cada operação de escrita.
-
 **Formato dos IDs:**
 - Utilizadores: `U0001`, `U0002`, ...
 - Artistas: `A0001`, `A0002`, ...
 
 Os contadores de ID são persistidos nos ficheiros JSON para garantir unicidade entre sessões.
-
 ---
 
 ## 🔗 Relação Utilizador ↔ Artista
