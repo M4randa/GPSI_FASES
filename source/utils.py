@@ -22,8 +22,22 @@ def gerar_id_artista():
     return novo_id
 
 
+def validar_nome(nome):
+    if len(nome) < 2:
+        return False
+    return True
+
+
+def validar_url(url):
+    if url.startswith("http://"):
+        return True
+    elif url.startswith("https://"):
+        return True
+    else:
+        return False
+
+
 def validar_data(data):
-    # Formato esperado: DD/MM/AAAA
     if len(data) != 10:
         return False
     if data[2] != "/" or data[5] != "/":
@@ -43,15 +57,6 @@ def validar_data(data):
     return True
 
 
-def validar_url(url):
-    if url.startswith("http://"):
-        return True
-    elif url.startswith("https://"):
-        return True
-    else:
-        return False
-
-
 def validar_estado_conta(estado):
     if estado == "ativo":
         return True
@@ -61,12 +66,6 @@ def validar_estado_conta(estado):
         return True
     else:
         return False
-
-
-def validar_nome(nome):
-    if len(nome) < 2:
-        return False
-    return True
 
 
 def validar_pais(pais):
@@ -101,4 +100,65 @@ def validar_ouvintes(valor):
     for c in valor:
         if c < "0" or c > "9":
             return False
+    return True
+
+
+def validar_ano(ano):
+    if len(ano) != 4:
+        return False
+    for c in ano:
+        if c < "0" or c > "9":
+            return False
+    if int(ano) < 1900 or int(ano) > 2025:
+        return False
+    return True
+
+
+def validar_tipo_lancamento(tipo):
+    if tipo == "album":
+        return True
+    elif tipo == "ep":
+        return True
+    elif tipo == "single":
+        return True
+    else:
+        return False
+
+
+def validar_verificado(valor):
+    if valor == "s":
+        return True
+    elif valor == "n":
+        return True
+    else:
+        return False
+
+
+def validar_biografia(bio):
+    if len(bio) < 5:
+        return False
+    return True
+
+
+def validar_titulo(titulo):
+    if len(titulo) < 1:
+        return False
+    return True
+
+
+def validar_faixa(faixa):
+    if len(faixa) < 1:
+        return False
+    return True
+
+
+def validar_escolha(escolha):
+    if len(escolha) < 1:
+        return False
+    return True
+
+
+def validar_pesquisa(termo):
+    if len(termo) == 0:
+        return False
     return True
