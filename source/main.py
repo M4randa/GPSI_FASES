@@ -24,6 +24,132 @@ from artistas import (
     remover_artista,
     seguir_artista
 )
+from utils import validar_nome, validar_url, validar_pais, validar_data, validar_generos, validar_estado_conta, validar_genero, validar_verificado, validar_biografia, validar_ouvintes, validar_ano, validar_tipo_lancamento, validar_titulo, validar_faixa, validar_pesquisa
+
+
+# ==============================
+# HELPERS DE INPUT COM WHILE TRUE
+# cada funcao pede o campo ate o utilizador acertar
+# ==============================
+
+def pedir_nome(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_nome(valor):
+            return valor
+        print("Erro: Minimo 2 caracteres.")
+
+
+def pedir_url(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_url(valor):
+            return valor
+        print("Erro: URL invalido. Tem de comecar com http:// ou https://")
+
+
+def pedir_pais(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_pais(valor):
+            return valor
+        print("Erro: Pais invalido. Nao pode conter numeros.")
+
+
+def pedir_data(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_data(valor):
+            return valor
+        print("Erro: Data invalida. Use DD/MM/AAAA (ex: 15/03/2000).")
+
+
+def pedir_generos(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_generos(valor):
+            return valor
+        print("Erro: Generos invalidos. Minimo 2 caracteres por genero.")
+
+
+def pedir_estado_conta(mensagem):
+    while True:
+        valor = input(mensagem).lower()
+        if validar_estado_conta(valor):
+            return valor
+        print("Erro: Estado invalido. Opcoes: ativo, inativo, premium.")
+
+
+def pedir_genero(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_genero(valor):
+            return valor
+        print("Erro: Genero invalido. Nao pode conter numeros.")
+
+
+def pedir_verificado(mensagem):
+    while True:
+        valor = input(mensagem).lower()
+        if validar_verificado(valor):
+            return valor
+        print("Erro: Resposta invalida. Use s ou n.")
+
+
+def pedir_biografia(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_biografia(valor):
+            return valor
+        print("Erro: Biografia demasiado curta. Minimo 5 caracteres.")
+
+
+def pedir_ouvintes(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_ouvintes(valor):
+            return valor
+        print("Erro: Valor invalido. Introduza um numero positivo.")
+
+
+def pedir_ano(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_ano(valor):
+            return valor
+        print("Erro: Ano invalido. Use 4 digitos numericos entre 1900 e 2025.")
+
+
+def pedir_tipo_lancamento(mensagem):
+    while True:
+        valor = input(mensagem).lower()
+        if validar_tipo_lancamento(valor):
+            return valor
+        print("Erro: Tipo invalido. Opcoes: album, ep, single.")
+
+
+def pedir_titulo(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_titulo(valor):
+            return valor
+        print("Erro: Titulo nao pode estar vazio.")
+
+
+def pedir_faixa(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_faixa(valor):
+            return valor
+        print("Erro: Nome da faixa nao pode estar vazio.")
+
+
+def pedir_pesquisa(mensagem):
+    while True:
+        valor = input(mensagem)
+        if validar_pesquisa(valor):
+            return valor
+        print("Erro: Introduza um termo para pesquisar.")
 
 
 # ==============================
@@ -45,13 +171,17 @@ def menu_utilizadores():
         opcao = input("Escolha uma opcao: ")
 
         if opcao == "1":
-            nome          = input("Nome de exibicao: ")
-            nome_util     = input("Nome de utilizador (interno): ")
-            foto          = input("URL da foto de perfil (http://...): ")
-            pais          = input("Pais: ")
-            data_nasc     = input("Data de nascimento (DD/MM/AAAA): ")
-            generos       = input("Generos preferidos (separados por virgula): ")
-            estado        = input("Estado da conta (ativo/inativo/premium): ")
+            nome      = pedir_nome("Nome de exibicao: ")
+            nome_util = pedir_nome("Nome de utilizador (interno): ")
+            # nome de exibicao nao pode ser igual ao nome interno
+            while nome.lower() == nome_util.lower():
+                print("Erro: Nome de exibicao nao pode ser igual ao nome de utilizador.")
+                nome_util = pedir_nome("Nome de utilizador (interno): ")
+            foto      = pedir_url("URL da foto de perfil: ")
+            pais      = pedir_pais("Pais: ")
+            data_nasc = pedir_data("Data de nascimento (DD/MM/AAAA): ")
+            generos   = pedir_generos("Generos preferidos (separados por virgula): ")
+            estado    = pedir_estado_conta("Estado da conta (ativo/inativo/premium): ")
             rc = criar_utilizador(nome, nome_util, foto, pais, data_nasc, generos, estado)
             if rc[0] == 201:
                 print("Utilizador criado com sucesso. ID: " + rc[1])
@@ -88,7 +218,7 @@ def menu_utilizadores():
                 print("Erro " + str(rc[0]) + ": " + rc[1])
 
         elif opcao == "4":
-            nome = input("Nome a pesquisar: ")
+            nome = pedir_pesquisa("Nome a pesquisar: ")
             rc = pesquisar_utilizadores(nome)
             if rc[0] == 200:
                 for id_u, u in rc[1].items():
@@ -97,12 +227,12 @@ def menu_utilizadores():
                 print("Erro " + str(rc[0]) + ": " + rc[1])
 
         elif opcao == "5":
-            id_u      = input("ID do utilizador: ")
-            nome      = input("Novo nome (enter para manter): ")
-            foto      = input("Nova URL da foto (enter para manter): ")
-            pais      = input("Novo pais (enter para manter): ")
-            estado    = input("Novo estado (enter para manter): ")
-            generos   = input("Novos generos (enter para manter): ")
+            id_u    = input("ID do utilizador: ")
+            nome    = input("Novo nome (enter para manter): ")
+            foto    = input("Nova URL da foto (enter para manter): ")
+            pais    = input("Novo pais (enter para manter): ")
+            estado  = input("Novo estado (enter para manter): ")
+            generos = input("Novos generos (enter para manter): ")
             rc = atualizar_utilizador(
                 id_u,
                 nome    if nome    else None,
@@ -156,12 +286,12 @@ def menu_artistas():
         opcao = input("Escolha uma opcao: ")
 
         if opcao == "1":
-            nome        = input("Nome do artista: ")
-            bio         = input("Biografia: ")
-            imagem      = input("URL da imagem de perfil (http://...): ")
-            imagem_capa = input("URL da imagem de capa (http://...): ")
-            genero      = input("Genero musical: ")
-            verificado  = input("Artista verificado? (s/n): ")
+            nome        = pedir_nome("Nome do artista: ")
+            bio         = pedir_biografia("Biografia: ")
+            imagem      = pedir_url("URL da imagem de perfil: ")
+            imagem_capa = pedir_url("URL da imagem de capa: ")
+            genero      = pedir_genero("Genero musical: ")
+            verificado  = pedir_verificado("Artista verificado? (s/n): ")
             rc = criar_artista(nome, bio, imagem, imagem_capa, genero, verificado)
             if rc[0] == 201:
                 print("Artista criado com sucesso. ID: " + rc[1])
@@ -201,7 +331,7 @@ def menu_artistas():
                 print("Erro " + str(rc[0]) + ": " + rc[1])
 
         elif opcao == "4":
-            nome = input("Nome a pesquisar: ")
+            nome = pedir_pesquisa("Nome a pesquisar: ")
             rc = pesquisar_artistas(nome)
             if rc[0] == 200:
                 for id_a, a in rc[1].items():
@@ -237,9 +367,9 @@ def menu_artistas():
 
         elif opcao == "6":
             id_a   = input("ID do artista: ")
-            titulo = input("Titulo do lancamento: ")
-            tipo   = input("Tipo (album/ep/single): ")
-            ano    = input("Ano (ex: 2023): ")
+            titulo = pedir_titulo("Titulo do lancamento: ")
+            tipo   = pedir_tipo_lancamento("Tipo (album/ep/single): ")
+            ano    = pedir_ano("Ano (ex: 2023): ")
             rc = adicionar_lancamento(id_a, titulo, tipo, ano)
             if rc[0] == 200:
                 print("Lancamento adicionado com sucesso.")
@@ -248,7 +378,7 @@ def menu_artistas():
 
         elif opcao == "7":
             id_a  = input("ID do artista: ")
-            faixa = input("Nome da faixa: ")
+            faixa = pedir_faixa("Nome da faixa: ")
             rc = adicionar_top_faixa(id_a, faixa)
             if rc[0] == 200:
                 print("Faixa adicionada ao top com sucesso.")
@@ -285,7 +415,6 @@ def menu_artistas():
 def main():
     print("\n===== SPOTIFY MANAGER =====")
     print("Abel Chongolola | GPSI 10A | N 01")
-
 
     while True:
         print("\n===== MENU PRINCIPAL =====")
