@@ -5,33 +5,10 @@
 # devolve codigos HTTP (200, 201, 404, 500)
 # ==============================
 
-import json
-import os
 from datetime import date
 from utils import gerar_id_utilizador, validar_nome, validar_url, validar_pais, validar_data, validar_generos, validar_estado_conta
 
 utilizadores = {}
-
-FICHEIRO = "utilizadores.json"
-
-
-# ==============================
-# PERSISTENCIA JSON
-# ==============================
-
-def guardar_utilizadores():
-    with open(FICHEIRO, "w", encoding="utf-8") as f:
-        json.dump(utilizadores, f, indent=4, ensure_ascii=False)
-    return 200, "Dados guardados com sucesso"
-
-
-def carregar_utilizadores():
-    global utilizadores
-    if not os.path.exists(FICHEIRO):
-        return 404, "Ficheiro nao encontrado, a comecar do zero"
-    with open(FICHEIRO, "r", encoding="utf-8") as f:
-        utilizadores = json.load(f)
-    return 200, "Utilizadores carregados com sucesso"
 
 
 # ==============================
@@ -43,7 +20,6 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
         return 500, "Nome invalido. Minimo 2 caracteres"
     if not validar_nome(nome_utilizador):
         return 500, "Nome de utilizador invalido"
-    # username tem de ser unico
     for u in utilizadores.values():
         if u["nome_utilizador"] == nome_utilizador:
             return 500, "Nome de utilizador ja esta em uso"
@@ -78,7 +54,6 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
         "historico_consumo":  [],
     }
 
-    guardar_utilizadores()
     return 201, id_utilizador
 
 
@@ -151,7 +126,6 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
             return 500, "Generos invalidos"
         utilizadores[id_utilizador]["generos_preferidos"] = [g.strip() for g in generos.split(",")]
 
-    guardar_utilizadores()
     return 200, "Utilizador atualizado com sucesso"
 
 
@@ -163,7 +137,6 @@ def remover_utilizador(id_utilizador):
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     del utilizadores[id_utilizador]
-    guardar_utilizadores()
     return 200, "Utilizador removido com sucesso"
 
 
@@ -177,5 +150,4 @@ def unfollow_artista(id_utilizador, id_artista):
     if id_artista not in utilizadores[id_utilizador]["seguidos"]:
         return 404, "O utilizador nao segue este artista"
     utilizadores[id_utilizador]["seguidos"].remove(id_artista)
-    guardar_utilizadores()
     return 200, "Deixou de seguir o artista com sucesso"
