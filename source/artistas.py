@@ -5,7 +5,7 @@
 # devolve codigos HTTP (200, 201, 404, 500)
 # ==============================
 
-from utils import gerar_id_artista, validar_nome, validar_url, validar_genero, validar_ouvintes
+from utils import gerar_id_artista, validar_nome, validar_url, validar_genero, validar_ouvintes, validar_ano, validar_tipo_lancamento, validar_verificado, validar_biografia, validar_titulo, validar_faixa, validar_escolha, validar_pesquisa
 from utilizadores import utilizadores
 
 artistas = {}
@@ -21,15 +21,15 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
     for a in artistas.values():
         if a["nome"].lower() == nome.lower():
             return 500, "Ja existe um artista com esse nome"
-    if len(bio) < 5:
+    if not validar_biografia(bio):
         return 500, "Biografia demasiado curta. Minimo 5 caracteres"
     if not validar_url(imagem):
-        return 500, "URL da imagem invalido. Use http:// ou https://"
+        return 500, "URL da imagem invalido"
     if not validar_url(imagem_capa):
-        return 500, "URL da capa invalido. Use http:// ou https://"
+        return 500, "URL da capa invalido"
     if not validar_genero(genero):
         return 500, "Genero invalido. Nao pode conter numeros"
-    if verificado != "s" and verificado != "n":
+    if not validar_verificado(verificado):
         return 500, "Verificado invalido. Use s ou n"
 
     id_artista = gerar_id_artista()
@@ -78,7 +78,7 @@ def consultar_artista(id_artista):
 # ==============================
 
 def pesquisar_artistas(nome):
-    if len(nome) == 0:
+    if not validar_pesquisa(nome):
         return 500, "Introduza um nome para pesquisar"
     encontrados = {}
     for id_a, a in artistas.items():
@@ -103,7 +103,7 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
         artistas[id_artista]["nome"] = nome
 
     if bio is not None:
-        if len(bio) < 5:
+        if not validar_biografia(bio):
             return 500, "Biografia demasiado curta. Minimo 5 caracteres"
         artistas[id_artista]["bio"] = bio
 
@@ -123,7 +123,7 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
         artistas[id_artista]["genero"] = genero
 
     if verificado is not None:
-        if verificado != "s" and verificado != "n":
+        if not validar_verificado(verificado):
             return 500, "Verificado invalido. Use s ou n"
         artistas[id_artista]["verificado"] = verificado == "s"
 
@@ -133,7 +133,7 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
         artistas[id_artista]["ouvintes_mensais"] = int(ouvintes_mensais)
 
     if escolha_artista is not None:
-        if len(escolha_artista) == 0:
+        if not validar_escolha(escolha_artista):
             return 500, "Escolha do artista nao pode estar vazia"
         artistas[id_artista]["escolha_artista"] = escolha_artista
 
@@ -147,17 +147,12 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
 def adicionar_lancamento(id_artista, titulo, tipo, ano):
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
-    if len(titulo) < 1:
+    if not validar_titulo(titulo):
         return 500, "Titulo invalido"
-    if tipo != "album" and tipo != "ep" and tipo != "single":
+    if not validar_tipo_lancamento(tipo):
         return 500, "Tipo invalido. Opcoes: album, ep, single"
-    if len(ano) != 4:
-        return 500, "Ano invalido. Use 4 digitos"
-    for c in ano:
-        if c < "0" or c > "9":
-            return 500, "Ano invalido. Apenas numeros"
-    if int(ano) < 1900 or int(ano) > 2025:
-        return 500, "Ano fora do intervalo valido (1900-2025)"
+    if not validar_ano(ano):
+        return 500, "Ano invalido. Use 4 digitos numericos entre 1900 e 2025"
     artistas[id_artista]["discografia"].append({"titulo": titulo, "tipo": tipo, "ano": ano})
     return 200, "Lancamento adicionado com sucesso"
 
@@ -171,7 +166,7 @@ def adicionar_top_faixa(id_artista, faixa):
         return 404, "Artista nao encontrado"
     if len(artistas[id_artista]["top_faixas"]) >= 5:
         return 500, "O top ja tem 5 faixas (maximo)"
-    if len(faixa) < 1:
+    if not validar_faixa(faixa):
         return 500, "Nome da faixa invalido"
     if faixa in artistas[id_artista]["top_faixas"]:
         return 500, "Esta faixa ja esta no top"
