@@ -1,8 +1,13 @@
 # 🎵 Spotify Manager — Sistema CRUD em Python
 
-**Autor:** Abel Chongolola | GPSI 10A | Nº 01
+**Autor:** Abel Chongolola | **Curso:** GPSI | **Ano:** 10° A | **Nº:** 01
 
-Sistema de gestão de utilizadores e artistas inspirado no Spotify, desenvolvido em Python com persistência em JSON.
+---
+
+## 📋 Descrição
+
+Sistema de gestão inspirado no Spotify, desenvolvido em Python.
+Permite gerir as entidades **Utilizador** e **Artista** com operações completas de Create, Read, Update e Delete (CRUD).
 
 ---
 
@@ -10,110 +15,109 @@ Sistema de gestão de utilizadores e artistas inspirado no Spotify, desenvolvido
 
 ```
 projeto/
-├── main.py              # Ponto de entrada da aplicação
-├── artistas.py          # CRUD e menu da entidade Artista
-├── utilizadores.py      # CRUD e menu da entidade Utilizador
-├── utils.py             # Funções de validação partilhadas
+│
+├── main.py          -> ponto de entrada, todos os inputs, prints e menus
+├── utilizadores.py  -> CRUD da entidade Utilizador
+├── artistas.py      -> CRUD da entidade Artista
+└── utils.py         -> funcoes de validacao e geradores de ID partilhados
 ```
 
 ---
 
-## 🚀 Como Executar
+## 🗂️ Entidades
 
-### Pré-requisitos
+### Utilizador
+| Campo | Descrição |
+|---|---|
+| `id_utilizador` | Gerado automaticamente (ex: U001) |
+| `nome_exibicao` | Nome visível no perfil |
+| `nome_utilizador` | Username interno (único) |
+| `foto_perfil` | URL da foto de perfil |
+| `pais` | País do utilizador |
+| `data_nascimento` | Data no formato DD/MM/AAAA |
+| `generos_preferidos` | Lista de géneros musicais |
+| `data_registro` | Gerada automaticamente pelo sistema |
+| `estado_conta` | ativo / inativo / premium |
+| `seguidores` | Lista de IDs que seguem este utilizador |
+| `seguidos` | Lista de IDs de artistas que segue |
+| `playlists_publicas` | Lista de playlists públicas |
+| `historico_consumo` | Histórico de músicas ouvidas |
 
-- Python 3.x instalado
+### Artista
+| Campo | Descrição |
+|---|---|
+| `id_artista` | Gerado automaticamente (ex: A001) |
+| `nome` | Nome do artista (único) |
+| `bio` | Biografia |
+| `imagem` | URL da imagem de perfil |
+| `imagem_capa` | URL da imagem de capa |
+| `genero` | Género musical |
+| `verificado` | Selo de verificação (True/False) |
+| `ouvintes_mensais` | Número de ouvintes mensais |
+| `seguidores` | Lista de IDs de utilizadores que seguem |
+| `top_faixas` | Até 5 faixas em destaque |
+| `discografia` | Lista de álbuns, EPs e singles |
+| `datas_concertos` | Datas de concertos agendados |
+| `escolha_artista` | Mensagem ou playlist em destaque |
 
-### Passos
+---
+
+## ⚙️ CRUD implementado
+
+| Operação | Utilizador | Artista |
+|---|---|---|
+| **Create** | `criar_utilizador()` | `criar_artista()` |
+| **Read** | `listar_utilizadores()` `consultar_utilizador()` `pesquisar_utilizadores()` | `listar_artistas()` `consultar_artista()` `pesquisar_artistas()` |
+| **Update** | `atualizar_utilizador()` | `atualizar_artista()` `adicionar_lancamento()` `adicionar_top_faixa()` |
+| **Delete** | `remover_utilizador()` | `remover_artista()` |
+
+---
+
+## 🔁 Relação entre entidades
+
+- Um utilizador pode **seguir** um artista → `seguir_artista()`
+- Um utilizador pode **deixar de seguir** um artista → `unfollow_artista()`
+
+---
+
+## 📡 Códigos de resposta
+
+As funções das entidades devolvem sempre um tuplo `(codigo, mensagem)` seguindo o padrão HTTP:
+
+| Código | Significado |
+|---|---|
+| `201` | Criado com sucesso |
+| `200` | Operação bem sucedida |
+| `404` | Não encontrado |
+| `500` | Erro de validação |
+
+---
+
+## ✅ Validações (utils.py)
+
+Todas as validações estão centralizadas em `utils.py` e partilhadas pelos dois módulos. Nenhuma usa `try/except`:
+
+- **Nomes** — mínimo 2 caracteres
+- **URLs** — obrigatório começar com `http://` ou `https://`
+- **Datas** — formato `DD/MM/AAAA` com intervalos lógicos
+- **País** — sem números, mínimo 2 caracteres
+- **Estado da conta** — apenas `ativo`, `inativo` ou `premium`
+- **Géneros** — mínimo 2 caracteres por género
+- **Ouvintes** — número inteiro positivo
+
+---
+
+## 🏗️ Estrutura de Dados
+
+Conforme recomendado no enunciado:
+
+- **Dicionários `{}`** — acesso rápido por ID para utilizadores e artistas
+- **Listas `[]`** — para agrupar múltiplos itens onde a ordem importa (seguidores, discografia, playlists, top faixas)
+
+---
+
+## 🚀 Como executar
 
 ```bash
-# Clonar ou descarregar os ficheiros do projeto
-# Navegar até à pasta do projeto
-
 python main.py
 ```
-
-Os ficheiros `.json` são criados/atualizados automaticamente ao executar o programa.
-
----
-
-## ⚙️ Funcionalidades
-
-### 👤 Gestão de Utilizadores (`utilizadores.py`)
-
-| Opção | Função |
-|-------|--------|
-| 1 | Criar utilizador |
-| 2 | Ver utilizador por ID |
-| 3 | Pesquisar utilizador por nome |
-| 4 | Atualizar utilizador |
-| 5 | Remover utilizador |
-| 6 | Listar todos os utilizadores |
-
-**Campos do utilizador:**
-- Nome de exibição, username (único), foto de perfil (URL)
-- País, data de nascimento, géneros preferidos
-- Estado da conta: `ativo` / `inativo` / `premium`
-- Seguidores, artistas seguidos, playlists públicas, histórico de consumo
-- Data de registo (gerada automaticamente)
-
----
-
-### 🎤 Gestão de Artistas (`artistas.py`)
-
-| Opção | Função |
-|-------|--------|
-| 1 | Criar artista |
-| 2 | Ver artista por ID |
-| 3 | Pesquisar artista por nome |
-| 4 | Atualizar artista |
-| 5 | Remover artista |
-| 6 | Listar todos os artistas |
-| 7 | Utilizador seguir artista |
-
-**Campos do artista:**
-- Nome (único), biografia, imagem de perfil e capa (URL)
-- Género musical, verificado (sim/não)
-- Discografia (álbum, EP, single), ouvintes mensais
-- Top faixas (máx. 5), datas de concertos, seguidores
-
----
-
-## 🔐 Validações (`utils.py`)
-
-Todas as entradas do utilizador são validadas antes de serem guardadas:
-
-| Validação | Regra |
-|-----------|-------|
-| Nome | Mínimo 2 caracteres |
-| URL | Deve começar com `http://` ou `https://` |
-| Data | Formato `DD/MM/AAAA`, anos entre 1900–2025 |
-| Data de concerto | Formato `DD/MM/AAAA`, anos entre 2024–2030 |
-| País | Sem números, mínimo 2 caracteres |
-| Género(s) | Sem números, mínimo 2 caracteres por género |
-| Ouvintes | Número inteiro positivo |
-| Ano | 4 dígitos, entre 1900–2025 |
-| Tipo de lançamento | `album`, `ep` ou `single` |
-| Estado da conta | `ativo`, `inativo` ou `premium` |
-
----
-**Formato dos IDs:**
-- Utilizadores: `U0001`, `U0002`, ...
-- Artistas: `A0001`, `A0002`, ...
-
-Os contadores de ID são persistidos nos ficheiros JSON para garantir unicidade entre sessões.
----
-
-## 🔗 Relação Utilizador ↔ Artista
-
-Um utilizador pode seguir artistas através da opção **7** do menu de artistas. Esta operação atualiza simultaneamente:
-- `seguidos[]` no utilizador
-- `seguidores[]` no artista
-
----
-
-## 📌 Notas
-
-- Nomes de utilizadores e artistas são únicos no sistema (verificação case-insensitive).
-- O programa **não usa** `isdigit()` nem métodos built-in de validação — toda a lógica é implementada manualmente.
-- Os dados são carregados automaticamente ao iniciar e guardados após cada alteração.
