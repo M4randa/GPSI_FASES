@@ -6,7 +6,7 @@
 # ==============================
 
 from datetime import date
-from utils import gerar_id_utilizador, validar_nome, validar_url, validar_pais, validar_data, validar_generos, validar_estado_conta
+from utils import gerar_id_utilizador, validar_nome, validar_url, validar_pais, validar_data, validar_generos, validar_estado_conta, validar_pesquisa
 
 utilizadores = {}
 
@@ -20,11 +20,13 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
         return 500, "Nome invalido. Minimo 2 caracteres"
     if not validar_nome(nome_utilizador):
         return 500, "Nome de utilizador invalido"
+    if nome.lower() == nome_utilizador.lower():
+        return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
     for u in utilizadores.values():
         if u["nome_utilizador"] == nome_utilizador:
             return 500, "Nome de utilizador ja esta em uso"
     if not validar_url(foto_perfil):
-        return 500, "URL invalido. Use http:// ou https://"
+        return 500, "URL invalido"
     if not validar_pais(pais):
         return 500, "Pais invalido. Nao pode conter numeros"
     if not validar_data(data_nascimento):
@@ -82,7 +84,7 @@ def consultar_utilizador(id_utilizador):
 # ==============================
 
 def pesquisar_utilizadores(nome):
-    if len(nome) == 0:
+    if not validar_pesquisa(nome):
         return 500, "Introduza um nome para pesquisar"
     encontrados = {}
     for id_u, u in utilizadores.items():
@@ -104,11 +106,14 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
     if nome is not None:
         if not validar_nome(nome):
             return 500, "Nome invalido. Minimo 2 caracteres"
+        # nome de exibicao nao pode ser igual ao nome de utilizador interno
+        if nome.lower() == utilizadores[id_utilizador]["nome_utilizador"].lower():
+            return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
         utilizadores[id_utilizador]["nome_exibicao"] = nome
 
     if foto_perfil is not None:
         if not validar_url(foto_perfil):
-            return 500, "URL invalido. Use http:// ou https://"
+            return 500, "URL invalido"
         utilizadores[id_utilizador]["foto_perfil"] = foto_perfil
 
     if pais is not None:
