@@ -1,25 +1,8 @@
 # ==============================
 # utils.py
-# funcoes auxiliares partilhadas
+# TODAS as validacoes de formato
+# unico ficheiro importado na main.py
 # ==============================
-
-# contadores para gerar IDs automaticos
-contador_utilizadores = 1
-contador_artistas     = 1
-
-
-def gerar_id_utilizador():
-    global contador_utilizadores
-    novo_id = "U" + str(contador_utilizadores).zfill(3)
-    contador_utilizadores += 1
-    return novo_id
-
-
-def gerar_id_artista():
-    global contador_artistas
-    novo_id = "A" + str(contador_artistas).zfill(3)
-    contador_artistas += 1
-    return novo_id
 
 
 def validar_nome(nome):
