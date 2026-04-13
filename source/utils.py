@@ -1,7 +1,7 @@
 # ==============================
 # utils.py
 # TODAS as validacoes de formato
-# unico ficheiro importado na main.py
+# importado por utilizadores.py e artistas.py
 # ==============================
 
 
