@@ -1,10 +1,23 @@
-
+# ==============================
+# utilizadores.py
+# CRUD da entidade Utilizador
+# SEM prints nem inputs
+# devolve codigos HTTP (200, 201, 404, 500)
+# ==============================
 
 from datetime import date
+from utils import (
+    validar_nome,
+    validar_url,
+    validar_pais,
+    validar_data,
+    validar_generos,
+    validar_estado_conta,
+    validar_pesquisa
+)
 
 utilizadores = {}
 
-# contador local para gerar IDs de utilizador
 _contador_utilizadores = 1
 
 
@@ -20,14 +33,25 @@ def _gerar_id_utilizador():
 # ==============================
 
 def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, generos, estado_conta):
-    # regra de negocio: nome de exibicao nao pode ser igual ao nome interno
+    if not validar_nome(nome):
+        return 500, "Nome invalido. Minimo 2 caracteres"
+    if not validar_nome(nome_utilizador):
+        return 500, "Nome de utilizador invalido"
     if nome.lower() == nome_utilizador.lower():
         return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
-
-    # regra de negocio: nome de utilizador tem de ser unico
     for u in utilizadores.values():
         if u["nome_utilizador"] == nome_utilizador:
             return 500, "Nome de utilizador ja esta em uso"
+    if not validar_url(foto_perfil):
+        return 500, "URL invalido"
+    if not validar_pais(pais):
+        return 500, "Pais invalido. Nao pode conter numeros"
+    if not validar_data(data_nascimento):
+        return 500, "Data invalida. Use formato DD/MM/AAAA"
+    if not validar_generos(generos):
+        return 500, "Generos invalidos. Minimo 2 caracteres por genero"
+    if not validar_estado_conta(estado_conta):
+        return 500, "Estado invalido. Opcoes: ativo, inativo, premium"
 
     id_utilizador = _gerar_id_utilizador()
     data_registro = date.today().strftime("%d/%m/%Y")
@@ -76,6 +100,8 @@ def consultar_utilizador(id_utilizador):
 # ==============================
 
 def pesquisar_utilizadores(nome):
+    if not validar_pesquisa(nome):
+        return 500, "Introduza um nome para pesquisar"
     encontrados = {}
     for id_u, u in utilizadores.items():
         if nome.lower() in u["nome_exibicao"].lower() or nome.lower() in u["nome_utilizador"].lower():
@@ -94,21 +120,30 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
         return 404, "Utilizador nao encontrado"
 
     if nome is not None:
-        # regra de negocio: nome de exibicao nao pode ser igual ao nome interno
+        if not validar_nome(nome):
+            return 500, "Nome invalido. Minimo 2 caracteres"
         if nome.lower() == utilizadores[id_utilizador]["nome_utilizador"].lower():
             return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
         utilizadores[id_utilizador]["nome_exibicao"] = nome
 
     if foto_perfil is not None:
+        if not validar_url(foto_perfil):
+            return 500, "URL invalido"
         utilizadores[id_utilizador]["foto_perfil"] = foto_perfil
 
     if pais is not None:
+        if not validar_pais(pais):
+            return 500, "Pais invalido. Nao pode conter numeros"
         utilizadores[id_utilizador]["pais"] = pais
 
     if estado_conta is not None:
+        if not validar_estado_conta(estado_conta):
+            return 500, "Estado invalido. Opcoes: ativo, inativo, premium"
         utilizadores[id_utilizador]["estado_conta"] = estado_conta
 
     if generos is not None:
+        if not validar_generos(generos):
+            return 500, "Generos invalidos"
         utilizadores[id_utilizador]["generos_preferidos"] = [g.strip() for g in generos.split(",")]
 
     return 200, "Utilizador atualizado com sucesso"
