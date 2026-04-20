@@ -37,7 +37,7 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
         return 500, "Nome invalido. Minimo 2 caracteres"
     if not validar_nome(nome_utilizador):
         return 500, "Nome de utilizador invalido"
-    if nome.lower() == nome_utilizador.lower():
+    if nome.strip().lower() == nome_utilizador.strip().lower():
         return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
     for u in utilizadores.values():
         if u["nome_utilizador"] == nome_utilizador:
@@ -55,8 +55,7 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
 
     id_utilizador = _gerar_id_utilizador()
     data_registro = date.today().strftime("%d/%m/%Y")
-
-    utilizadores[id_utilizador] = {
+    utilizador = {
         "id_utilizador":      id_utilizador,
         "nome_exibicao":      nome,
         "nome_utilizador":    nome_utilizador,
@@ -71,8 +70,9 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
         "playlists_publicas": [],
         "historico_consumo":  [],
     }
+    utilizadores[id_utilizador] = utilizador
 
-    return 201, id_utilizador
+    return 201, utilizador
 
 
 # ==============================
@@ -122,7 +122,7 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
     if nome is not None:
         if not validar_nome(nome):
             return 500, "Nome invalido. Minimo 2 caracteres"
-        if nome.lower() == utilizadores[id_utilizador]["nome_utilizador"].lower():
+        if nome.strip().lower() == utilizadores[id_utilizador]["nome_utilizador"].strip().lower():
             return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
         utilizadores[id_utilizador]["nome_exibicao"] = nome
 
@@ -146,7 +146,7 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
             return 500, "Generos invalidos"
         utilizadores[id_utilizador]["generos_preferidos"] = [g.strip() for g in generos.split(",")]
 
-    return 200, "Utilizador atualizado com sucesso"
+    return 200, utilizadores[id_utilizador]
 
 
 # ==============================
@@ -157,7 +157,7 @@ def remover_utilizador(id_utilizador):
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     del utilizadores[id_utilizador]
-    return 200, "Utilizador removido com sucesso"
+    return 200, id_utilizador
 
 
 # ==============================
@@ -170,4 +170,4 @@ def unfollow_artista(id_utilizador, id_artista):
     if id_artista not in utilizadores[id_utilizador]["seguidos"]:
         return 404, "O utilizador nao segue este artista"
     utilizadores[id_utilizador]["seguidos"].remove(id_artista)
-    return 200, "Deixou de seguir o artista com sucesso"
+    return 200, utilizadores[id_utilizador]
