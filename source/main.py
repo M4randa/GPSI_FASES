@@ -53,49 +53,51 @@ def menu_utilizadores():
             data_nasc = input("Data de nascimento (DD/MM/AAAA): ")
             generos   = input("Generos preferidos (separados por virgula): ")
             estado    = input("Estado da conta (ativo/inativo/premium): ").lower()
-            rc = criar_utilizador(nome, nome_util, foto, pais, data_nasc, generos, estado)
-            if rc[0] == 201:
-                print("Utilizador criado com sucesso. ID: " + rc[1])
+            code, obj = criar_utilizador(nome, nome_util, foto, pais, data_nasc, generos, estado)
+            if code == 201:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "2":
-            rc = listar_utilizadores()
-            if rc[0] == 200:
-                for id_u, u in rc[1].items():
+            code, obj = listar_utilizadores()
+            if code == 200:
+                for id_u, u in obj.items():
                     print(id_u + " | " + u["nome_exibicao"] + " | " + u["nome_utilizador"] + " | " + u["estado_conta"] + " | " + u["pais"])
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "3":
             id_u = input("ID do utilizador: ")
-            rc = consultar_utilizador(id_u)
-            if rc[0] == 200:
-                u = rc[1]
-                print("\n  ID               : " + u["id_utilizador"])
-                print("  Nome de Exibicao : " + u["nome_exibicao"])
-                print("  Username         : " + u["nome_utilizador"])
-                print("  Foto de Perfil   : " + u["foto_perfil"])
-                print("  Pais             : " + u["pais"])
-                print("  Nascimento       : " + u["data_nascimento"])
-                print("  Generos          : " + ", ".join(u["generos_preferidos"]))
-                print("  Data de Registo  : " + u["data_registro"])
-                print("  Estado da Conta  : " + u["estado_conta"])
-                print("  Seguidores       : " + str(len(u["seguidores"])))
-                print("  Seguindo         : " + str(len(u["seguidos"])))
-                if len(u["seguidos"]) > 0:
-                    print("  Artistas seguidos: " + ", ".join(u["seguidos"]))
+            code, obj = consultar_utilizador(id_u)
+            if code == 200:
+                print("\n  ID               : " + obj["id_utilizador"])
+                print("  Nome de Exibicao : " + obj["nome_exibicao"])
+                print("  Username         : " + obj["nome_utilizador"])
+                print("  Foto de Perfil   : " + obj["foto_perfil"])
+                print("  Pais             : " + obj["pais"])
+                print("  Nascimento       : " + obj["data_nascimento"])
+                print("  Generos          : " + ", ".join(obj["generos_preferidos"]))
+                print("  Data de Registo  : " + obj["data_registro"])
+                print("  Estado da Conta  : " + obj["estado_conta"])
+                print("  Seguidores       : " + str(len(obj["seguidores"])))
+                print("  Seguindo         : " + str(len(obj["seguidos"])))
+                if len(obj["seguidos"]) > 0:
+                    print("  Artistas seguidos: " + ", ".join(obj["seguidos"]))
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "4":
             nome = input("Nome a pesquisar: ")
-            rc = pesquisar_utilizadores(nome)
-            if rc[0] == 200:
-                for id_u, u in rc[1].items():
+            code, obj = pesquisar_utilizadores(nome)
+            if code == 200:
+                for id_u, u in obj.items():
                     print(id_u + " | " + u["nome_exibicao"] + " | " + u["nome_utilizador"] + " | " + u["estado_conta"])
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "5":
             id_u    = input("ID do utilizador: ")
@@ -104,7 +106,7 @@ def menu_utilizadores():
             pais    = input("Novo pais (enter para manter): ")
             estado  = input("Novo estado (enter para manter): ").lower()
             generos = input("Novos generos (enter para manter): ")
-            rc = atualizar_utilizador(
+            code, obj = atualizar_utilizador(
                 id_u,
                 nome    if nome    else None,
                 foto    if foto    else None,
@@ -112,27 +114,27 @@ def menu_utilizadores():
                 estado  if estado  else None,
                 generos if generos else None
             )
-            if rc[0] == 200:
-                print("Utilizador atualizado com sucesso.")
+            if code == 200:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "6":
             id_u = input("ID do utilizador: ")
-            rc = remover_utilizador(id_u)
-            if rc[0] == 200:
-                print("Utilizador removido com sucesso.")
+            code, obj = remover_utilizador(id_u)
+            if code == 200:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "7":
             id_u = input("ID do utilizador: ")
             id_a = input("ID do artista a deixar de seguir: ")
-            rc = unfollow_artista(id_u, id_a)
-            if rc[0] == 200:
-                print("Deixou de seguir o artista com sucesso.")
+            code, obj = unfollow_artista(id_u, id_a)
+            if code == 200:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "0":
             break
@@ -163,52 +165,54 @@ def menu_artistas():
             imagem_capa = input("URL da imagem de capa: ")
             genero      = input("Genero musical: ")
             verificado  = input("Artista verificado? (s/n): ").lower()
-            rc = criar_artista(nome, bio, imagem, imagem_capa, genero, verificado)
-            if rc[0] == 201:
-                print("Artista criado com sucesso. ID: " + rc[1])
+            code, obj = criar_artista(nome, bio, imagem, imagem_capa, genero, verificado)
+            if code == 201:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "2":
-            rc = listar_artistas()
-            if rc[0] == 200:
-                for id_a, a in rc[1].items():
+            code, obj = listar_artistas()
+            if code == 200:
+                for id_a, a in obj.items():
                     verificado_str = "Sim" if a["verificado"] else "Nao"
                     print(id_a + " | " + a["nome"] + " | " + a["genero"] + " | " + str(a["ouvintes_mensais"]) + " ouvintes | Verificado: " + verificado_str)
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "3":
             id_a = input("ID do artista: ")
-            rc = consultar_artista(id_a)
-            if rc[0] == 200:
-                a = rc[1]
-                verificado_str = "Sim" if a["verificado"] else "Nao"
-                print("\n  ID               : " + a["id_artista"])
-                print("  Nome             : " + a["nome"])
-                print("  Genero           : " + a["genero"])
+            code, obj = consultar_artista(id_a)
+            if code == 200:
+                verificado_str = "Sim" if obj["verificado"] else "Nao"
+                print("\n  ID               : " + obj["id_artista"])
+                print("  Nome             : " + obj["nome"])
+                print("  Genero           : " + obj["genero"])
                 print("  Verificado       : " + verificado_str)
-                print("  Biografia        : " + a["bio"])
-                print("  Ouvintes Mensais : " + str(a["ouvintes_mensais"]))
-                print("  Seguidores       : " + str(len(a["seguidores"])))
-                print("  Discografia      : " + str(len(a["discografia"])) + " lancamento(s)")
-                print("  Top Faixas       : " + str(len(a["top_faixas"])) + " faixa(s)")
-                print("  Escolha Artista  : " + (a["escolha_artista"] if a["escolha_artista"] else "Nao definido"))
-                if len(a["discografia"]) > 0:
+                print("  Biografia        : " + obj["bio"])
+                print("  Ouvintes Mensais : " + str(obj["ouvintes_mensais"]))
+                print("  Seguidores       : " + str(len(obj["seguidores"])))
+                print("  Discografia      : " + str(len(obj["discografia"])) + " lancamento(s)")
+                print("  Top Faixas       : " + str(len(obj["top_faixas"])) + " faixa(s)")
+                print("  Escolha Artista  : " + (obj["escolha_artista"] if obj["escolha_artista"] else "Nao definido"))
+                if len(obj["discografia"]) > 0:
                     print("\n  --- Discografia ---")
-                    for d in a["discografia"]:
+                    for d in obj["discografia"]:
                         print("    " + d["tipo"].upper() + " | " + d["titulo"] + " (" + d["ano"] + ")")
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "4":
             nome = input("Nome a pesquisar: ")
-            rc = pesquisar_artistas(nome)
-            if rc[0] == 200:
-                for id_a, a in rc[1].items():
+            code, obj = pesquisar_artistas(nome)
+            if code == 200:
+                for id_a, a in obj.items():
                     print(id_a + " | " + a["nome"] + " | " + a["genero"])
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "5":
             id_a        = input("ID do artista: ")
@@ -220,7 +224,7 @@ def menu_artistas():
             verificado  = input("Verificado s/n (enter para manter): ").lower()
             ouvintes    = input("Ouvintes mensais (enter para manter): ")
             escolha     = input("Escolha do artista (enter para manter): ")
-            rc = atualizar_artista(
+            code, obj = atualizar_artista(
                 id_a,
                 nome        if nome        else None,
                 bio         if bio         else None,
@@ -231,47 +235,47 @@ def menu_artistas():
                 ouvintes    if ouvintes    else None,
                 escolha     if escolha     else None
             )
-            if rc[0] == 200:
-                print("Artista atualizado com sucesso.")
+            if code == 200:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "6":
             id_a   = input("ID do artista: ")
             titulo = input("Titulo do lancamento: ")
             tipo   = input("Tipo (album/ep/single): ").lower()
             ano    = input("Ano (ex: 2023): ")
-            rc = adicionar_lancamento(id_a, titulo, tipo, ano)
-            if rc[0] == 200:
-                print("Lancamento adicionado com sucesso.")
+            code, obj = adicionar_lancamento(id_a, titulo, tipo, ano)
+            if code == 200:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "7":
             id_a  = input("ID do artista: ")
             faixa = input("Nome da faixa: ")
-            rc = adicionar_top_faixa(id_a, faixa)
-            if rc[0] == 200:
-                print("Faixa adicionada ao top com sucesso.")
+            code, obj = adicionar_top_faixa(id_a, faixa)
+            if code == 200:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "8":
             id_a = input("ID do artista: ")
-            rc = remover_artista(id_a)
-            if rc[0] == 200:
-                print("Artista removido com sucesso.")
+            code, obj = remover_artista(id_a)
+            if code == 200:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "9":
             id_u = input("ID do utilizador: ")
             id_a = input("ID do artista: ")
-            rc = seguir_artista(id_u, id_a)
-            if rc[0] == 200:
-                print("Utilizador agora segue o artista.")
+            code, obj = seguir_artista(id_u, id_a)
+            if code == 200:
+                print(code)
             else:
-                print("Erro " + str(rc[0]) + ": " + rc[1])
+                print(obj)
 
         elif opcao == "0":
             break
