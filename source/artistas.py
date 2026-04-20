@@ -72,7 +72,7 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
         "escolha_artista":  "",
     }
 
-    return 201, id_artista
+    return 201, artistas[id_artista]
 
 
 # ==============================
@@ -159,7 +159,7 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
             return 500, "Escolha do artista nao pode estar vazia"
         artistas[id_artista]["escolha_artista"] = escolha_artista
 
-    return 200, "Artista atualizado com sucesso"
+    return 200, artistas[id_artista]
 
 
 # ==============================
@@ -176,7 +176,7 @@ def adicionar_lancamento(id_artista, titulo, tipo, ano):
     if not validar_ano(ano):
         return 500, "Ano invalido. Use 4 digitos numericos entre 1900 e 2025"
     artistas[id_artista]["discografia"].append({"titulo": titulo, "tipo": tipo, "ano": ano})
-    return 200, "Lancamento adicionado com sucesso"
+    return 200, artistas[id_artista]
 
 
 # ==============================
@@ -193,7 +193,7 @@ def adicionar_top_faixa(id_artista, faixa):
     if faixa in artistas[id_artista]["top_faixas"]:
         return 500, "Esta faixa ja esta no top"
     artistas[id_artista]["top_faixas"].append(faixa)
-    return 200, "Faixa adicionada ao top com sucesso"
+    return 200, artistas[id_artista]
 
 
 # ==============================
@@ -204,7 +204,7 @@ def remover_artista(id_artista):
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
     del artistas[id_artista]
-    return 200, "Artista removido com sucesso"
+    return 200, id_artista
 
 
 # ==============================
@@ -220,4 +220,4 @@ def seguir_artista(id_utilizador, id_artista):
         return 500, "O utilizador ja segue este artista"
     utilizadores[id_utilizador]["seguidos"].append(id_artista)
     artistas[id_artista]["seguidores"].append(id_utilizador)
-    return 200, "Utilizador agora segue o artista com sucesso"
+    return 200, artistas[id_artista]
