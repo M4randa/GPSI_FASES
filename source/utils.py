@@ -4,9 +4,11 @@
 # importado por utilizadores.py e artistas.py
 # ==============================
 
+from datetime import datetime
+
 
 def validar_nome(nome):
-    if len(nome) < 2:
+    if len(nome.strip()) < 2:
         return False
     return True
 
@@ -25,17 +27,11 @@ def validar_data(data):
         return False
     if data[2] != "/" or data[5] != "/":
         return False
-    dia = data[0:2]
-    mes = data[3:5]
-    ano = data[6:10]
-    for c in dia + mes + ano:
-        if c < "0" or c > "9":
-            return False
-    if int(dia) < 1 or int(dia) > 31:
+    try:
+        dt = datetime.strptime(data, "%d/%m/%Y")
+    except ValueError:
         return False
-    if int(mes) < 1 or int(mes) > 12:
-        return False
-    if int(ano) < 1900 or int(ano) > 2025:
+    if dt.year < 1900 or dt.year > 2025:
         return False
     return True
 
@@ -52,9 +48,9 @@ def validar_estado_conta(estado):
 
 
 def validar_pais(pais):
-    if len(pais) < 2:
+    if len(pais.strip()) < 2:
         return False
-    for c in pais:
+    for c in pais.strip():
         if c >= "0" and c <= "9":
             return False
     return True
@@ -69,9 +65,9 @@ def validar_generos(generos):
 
 
 def validar_genero(genero):
-    if len(genero) < 2:
+    if len(genero.strip()) < 2:
         return False
-    for c in genero:
+    for c in genero.strip():
         if c >= "0" and c <= "9":
             return False
     return True
@@ -89,9 +85,8 @@ def validar_ouvintes(valor):
 def validar_ano(ano):
     if len(ano) != 4:
         return False
-    for c in ano:
-        if c < "0" or c > "9":
-            return False
+    if not ano.isdigit():
+        return False
     if int(ano) < 1900 or int(ano) > 2025:
         return False
     return True
@@ -118,30 +113,30 @@ def validar_verificado(valor):
 
 
 def validar_biografia(bio):
-    if len(bio) < 5:
+    if len(bio.strip()) < 5:
         return False
     return True
 
 
 def validar_titulo(titulo):
-    if len(titulo) < 1:
+    if len(titulo.strip()) < 1:
         return False
     return True
 
 
 def validar_faixa(faixa):
-    if len(faixa) < 1:
+    if len(faixa.strip()) < 1:
         return False
     return True
 
 
 def validar_escolha(escolha):
-    if len(escolha) < 1:
+    if len(escolha.strip()) < 1:
         return False
     return True
 
 
 def validar_pesquisa(termo):
-    if len(termo) == 0:
+    if len(termo.strip()) == 0:
         return False
     return True
