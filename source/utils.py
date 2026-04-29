@@ -138,5 +138,98 @@ def validar_escolha(escolha):
 
 def validar_pesquisa(termo):
     if len(termo.strip()) == 0:
+# ==============================
+# VALIDAÇÕES PARA musicas.py
+# ==============================
+
+def validar_duracao(duracao_ms):
+    """Valida duração (deve ser um número inteiro positivo)"""
+    try:
+        valor = int(duracao_ms)
+        return valor > 0
+    except (ValueError, TypeError):
+        return False
+
+
+def validar_isrc(isrc):
+    """Valida código ISRC (formato: 2 letras + 3 letras + 2 dígitos + 5 dígitos)"""
+    if not isinstance(isrc, str):
+        return False
+    if len(isrc) != 12:
+        return False
+    # Primeiros 2 caracteres: letras
+    if not isrc[0:2].isalpha():
+        return False
+    # Próximos 3 caracteres: letras
+    if not isrc[2:5].isalpha():
+        return False
+    # Próximos 2 caracteres: dígitos
+    if not isrc[5:7].isdigit():
+        return False
+    # Últimos 5 caracteres: dígitos
+    if not isrc[7:12].isdigit():
+        return False
+    return True
+
+
+def validar_letra(letra):
+    """Valida letra da música (mínimo 5 caracteres)"""
+    if len(letra.strip()) < 5:
+        return False
+    return True
+
+
+def validar_bitrate(bitrate):
+    """Valida bitrate (deve ser 128, 192, 256, 320)"""
+    try:
+        valor = int(bitrate)
+        return valor in [128, 192, 256, 320]
+    except (ValueError, TypeError):
+        return False
+
+
+def validar_reproducoes(reproducoes):
+    """Valida contagem de reproduções (número inteiro não negativo)"""
+    try:
+        valor = int(reproducoes)
+        return valor >= 0
+    except (ValueError, TypeError):
+        return False
+
+
+def validar_booleano(valor):
+    """Valida se o valor pode ser convertido para booleano"""
+    if isinstance(valor, bool):
+        return True
+    if isinstance(valor, str):
+        if valor.lower() in ["true", "false", "1", "0", "s", "n", "sim", "nao"]:
+            return True
+    if isinstance(valor, int):
+        if valor in [0, 1]:
+            return True
+    return False
+
+
+# ==============================
+# VALIDAÇÕES PARA playlists.py
+# ==============================
+
+def validar_privacidade(privacidade):
+    """Valida privacidade da playlist: publica ou privada"""
+    if privacidade == "publica":
+        return True
+    elif privacidade == "privada":
+        return True
+    else:
+        return False
+
+
+def validar_descricao(descricao):
+    """Valida descrição (mínimo 5 caracteres, máximo 500)"""
+    if len(descricao.strip()) < 5:
+        return False
+    if len(descricao) > 500:
+        return False
+    return True
         return False
     return True
