@@ -13,6 +13,7 @@ from utils import (
     validar_booleano
 )
 from utilizadores import utilizadores
+from musicas import musicas
 
 from datetime import datetime
 
@@ -32,7 +33,7 @@ def _gerar_id_playlist():
 # CREATE
 # ==============================
 
-def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_playlist):
+def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_playlist, lista_ids=None):
     if not validar_nome(nome_playlist):
         return 500, "Nome invalido"
     if id_utilizador not in utilizadores:
@@ -44,20 +45,29 @@ def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_pl
     if not validar_url(capa_playlist):
         return 500, "URL da capa invalido"
 
+    ids_validados = []
+    if lista_ids is not None:
+        for id_musica in lista_ids:
+            if id_musica not in musicas:
+                return 404, f"Musica {id_musica} nao encontrada"
+            if id_musica in ids_validados:
+                return 500, f"Musica {id_musica} duplicada na lista"
+            ids_validados.append(id_musica)
+
     id_playlist = _gerar_id_playlist()
 
     playlists[id_playlist] = {
-        "id_playlist": id_playlist,
-        "nome_playlist": nome_playlist,
-        "id_utilizador": id_utilizador,
-        "privacidade": privacidade,
-        "lista_ids": [],
-        "descricao": descricao,
-        "capa_playlist": capa_playlist,
-        "data_criacao": datetime.now().strftime("%d/%m/%Y"),
+        "id_playlist":        id_playlist,
+        "nome_playlist":      nome_playlist,
+        "id_utilizador":      id_utilizador,
+        "privacidade":        privacidade,
+        "lista_ids":          list(ids_validados),
+        "descricao":          descricao,
+        "capa_playlist":      capa_playlist,
+        "data_criacao":       datetime.now().strftime("%d/%m/%Y"),
         "seguidores_playlist": [],
-        "ordem_musicas": [],
-        "flag_remocao": False
+        "ordem_musicas":      list(ids_validados),
+        "flag_remocao":       False
     }
 
     return 201, playlists[id_playlist]
@@ -83,7 +93,7 @@ def consultar_playlist(id_playlist):
 # UPDATE
 # ==============================
 
-def atualizar_playlist(id_playlist, nome_playlist=None, privacidade=None, descricao=None, flag_remocao=None):
+def atualizar_playlist(id_playlist, nome_playlist=None, privacidade=None, descricao=None, flag_remocao=None, adicionar_musicas=None, remover_musicas=None):
     if id_playlist not in playlists:
         return 404, "Playlist nao encontrada"
 
@@ -107,36 +117,21 @@ def atualizar_playlist(id_playlist, nome_playlist=None, privacidade=None, descri
             return 500, "Flag de remocao invalida"
         playlists[id_playlist]["flag_remocao"] = bool(flag_remocao)
 
-    return 200, playlists[id_playlist]
+    if adicionar_musicas is not None:
+        for id_musica in adicionar_musicas:
+            if id_musica not in musicas:
+                return 404, f"Musica {id_musica} nao encontrada"
+            if id_musica in playlists[id_playlist]["lista_ids"]:
+                return 500, f"Musica {id_musica} ja existe na playlist"
+            playlists[id_playlist]["lista_ids"].append(id_musica)
+            playlists[id_playlist]["ordem_musicas"].append(id_musica)
 
-
-# ==============================
-# UPDATE - adicionar/remover musicas
-# ==============================
-
-def adicionar_musica_playlist(id_playlist, id_musica):
-    if id_playlist not in playlists:
-        return 404, "Playlist nao encontrada"
-    if id_musica not in musicas:
-        return 404, "Musica nao encontrada"
-    if id_musica in playlists[id_playlist]["lista_ids"]:
-        return 500, "Musica ja existente na playlist"
-
-    playlists[id_playlist]["lista_ids"].append(id_musica)
-    playlists[id_playlist]["ordem_musicas"].append(id_musica)
-
-    return 200, playlists[id_playlist]
-
-
-def remover_musica_playlist(id_playlist, id_musica):
-    if id_playlist not in playlists:
-        return 404, "Playlist nao encontrada"
-    if id_musica not in playlists[id_playlist]["lista_ids"]:
-        return 404, "Musica nao encontrada na playlist"
-
-    playlists[id_playlist]["lista_ids"].remove(id_musica)
-    if id_musica in playlists[id_playlist]["ordem_musicas"]:
-        playlists[id_playlist]["ordem_musicas"].remove(id_musica)
+    if remover_musicas is not None:
+        for id_musica in remover_musicas:
+            if id_musica not in playlists[id_playlist]["lista_ids"]:
+                return 404, f"Musica {id_musica} nao encontrada na playlist"
+            playlists[id_playlist]["lista_ids"].remove(id_musica)
+            playlists[id_playlist]["ordem_musicas"].remove(id_musica)
 
     return 200, playlists[id_playlist]
 
