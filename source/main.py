@@ -33,7 +33,7 @@ from musica import (
     atualizar_musica,
     remover_musica
 )
-from Playlist import (
+from playlist import (
     criar_playlist,
     listar_playlists,
     consultar_playlist,
