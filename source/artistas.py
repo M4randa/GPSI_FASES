@@ -5,6 +5,8 @@
 # devolve codigos HTTP (200, 201, 404, 500)
 # ==============================
 
+import json
+import os
 from utils import (
     validar_nome,
     validar_url,
@@ -19,11 +21,33 @@ from utils import (
     validar_escolha,
     validar_pesquisa
 )
-from utilizadores import utilizadores
+from utilizadores import utilizadores, guardar_utilizadores
 
 artistas = {}
 
 _contador_artistas = 1
+
+_FICHEIRO = "artistas.json"
+
+
+# ==============================
+# JSON
+# ==============================
+
+def guardar_artistas():
+    dados = {"contador": _contador_artistas, "artistas": artistas}
+    with open(_FICHEIRO, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=4, ensure_ascii=False)
+
+
+def carregar_artistas():
+    global artistas, _contador_artistas
+    if not os.path.exists(_FICHEIRO):
+        return
+    with open(_FICHEIRO, "r", encoding="utf-8") as f:
+        dados = json.load(f)
+    _contador_artistas = dados["contador"]
+    artistas            = dados["artistas"]
 
 
 def _gerar_id_artista():
@@ -55,7 +79,6 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
         return 500, "Verificado invalido. Use s ou n"
 
     id_artista = _gerar_id_artista()
-
     artistas[id_artista] = {
         "id_artista":       id_artista,
         "nome":             nome,
@@ -71,7 +94,7 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
         "datas_concertos":  [],
         "escolha_artista":  "",
     }
-
+    guardar_artistas()
     return 201, artistas[id_artista]
 
 
@@ -159,6 +182,7 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
             return 500, "Escolha do artista nao pode estar vazia"
         artistas[id_artista]["escolha_artista"] = escolha_artista
 
+    guardar_artistas()
     return 200, artistas[id_artista]
 
 
@@ -176,6 +200,7 @@ def adicionar_lancamento(id_artista, titulo, tipo, ano):
     if not validar_ano(ano):
         return 500, "Ano invalido. Use 4 digitos numericos entre 1900 e 2025"
     artistas[id_artista]["discografia"].append({"titulo": titulo, "tipo": tipo, "ano": ano})
+    guardar_artistas()
     return 200, artistas[id_artista]
 
 
@@ -193,6 +218,7 @@ def adicionar_top_faixa(id_artista, faixa):
     if faixa in artistas[id_artista]["top_faixas"]:
         return 500, "Esta faixa ja esta no top"
     artistas[id_artista]["top_faixas"].append(faixa)
+    guardar_artistas()
     return 200, artistas[id_artista]
 
 
@@ -204,6 +230,7 @@ def remover_artista(id_artista):
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
     del artistas[id_artista]
+    guardar_artistas()
     return 200, id_artista
 
 
@@ -220,4 +247,6 @@ def seguir_artista(id_utilizador, id_artista):
         return 500, "O utilizador ja segue este artista"
     utilizadores[id_utilizador]["seguidos"].append(id_artista)
     artistas[id_artista]["seguidores"].append(id_utilizador)
+    guardar_artistas()
+    guardar_utilizadores()
     return 200, artistas[id_artista]
