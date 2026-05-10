@@ -5,6 +5,8 @@
 # devolve codigos HTTP (200, 201, 404, 500)
 # ==============================
 
+import json
+import os
 from datetime import date
 from utils import (
     validar_nome,
@@ -19,6 +21,28 @@ from utils import (
 utilizadores = {}
 
 _contador_utilizadores = 1
+
+_FICHEIRO = "utilizadores.json"
+
+
+# ==============================
+# JSON
+# ==============================
+
+def guardar_utilizadores():
+    dados = {"contador": _contador_utilizadores, "utilizadores": utilizadores}
+    with open(_FICHEIRO, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=4, ensure_ascii=False)
+
+
+def carregar_utilizadores():
+    global utilizadores, _contador_utilizadores
+    if not os.path.exists(_FICHEIRO):
+        return
+    with open(_FICHEIRO, "r", encoding="utf-8") as f:
+        dados = json.load(f)
+    _contador_utilizadores = dados["contador"]
+    utilizadores            = dados["utilizadores"]
 
 
 def _gerar_id_utilizador():
@@ -71,7 +95,7 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
         "historico_consumo":  [],
     }
     utilizadores[id_utilizador] = utilizador
-
+    guardar_utilizadores()
     return 201, utilizador
 
 
@@ -146,6 +170,7 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
             return 500, "Generos invalidos"
         utilizadores[id_utilizador]["generos_preferidos"] = [g.strip() for g in generos.split(",")]
 
+    guardar_utilizadores()
     return 200, utilizadores[id_utilizador]
 
 
@@ -157,6 +182,7 @@ def remover_utilizador(id_utilizador):
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     del utilizadores[id_utilizador]
+    guardar_utilizadores()
     return 200, id_utilizador
 
 
@@ -170,4 +196,5 @@ def unfollow_artista(id_utilizador, id_artista):
     if id_artista not in utilizadores[id_utilizador]["seguidos"]:
         return 404, "O utilizador nao segue este artista"
     utilizadores[id_utilizador]["seguidos"].remove(id_artista)
+    guardar_utilizadores()
     return 200, utilizadores[id_utilizador]
