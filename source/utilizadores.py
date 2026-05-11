@@ -18,31 +18,29 @@ from utils import (
     validar_pesquisa
 )
 
+FICHEIRO_UTILIZADORES = "utilizadores.json"
+
 utilizadores = {}
 
 _contador_utilizadores = 1
 
-_FICHEIRO = "utilizadores.json"
-
 
 # ==============================
-# JSON
+# PERSISTENCIA
 # ==============================
 
 def guardar_utilizadores():
-    dados = {"contador": _contador_utilizadores, "utilizadores": utilizadores}
-    with open(_FICHEIRO, "w", encoding="utf-8") as f:
-        json.dump(dados, f, indent=4, ensure_ascii=False)
+    with open(FICHEIRO_UTILIZADORES, "w", encoding="utf-8") as f:
+        json.dump(utilizadores, f, indent=4, ensure_ascii=False)
 
 
 def carregar_utilizadores():
-    global utilizadores, _contador_utilizadores
-    if not os.path.exists(_FICHEIRO):
-        return
-    with open(_FICHEIRO, "r", encoding="utf-8") as f:
-        dados = json.load(f)
-    _contador_utilizadores = dados["contador"]
-    utilizadores            = dados["utilizadores"]
+    global utilizadores
+    if os.path.exists(FICHEIRO_UTILIZADORES):
+        with open(FICHEIRO_UTILIZADORES, "r", encoding="utf-8") as f:
+            utilizadores = json.load(f)
+    else:
+        utilizadores = {}
 
 
 def _gerar_id_utilizador():
@@ -57,6 +55,7 @@ def _gerar_id_utilizador():
 # ==============================
 
 def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, generos, estado_conta):
+    carregar_utilizadores()
     if not validar_nome(nome):
         return 500, "Nome invalido. Minimo 2 caracteres"
     if not validar_nome(nome_utilizador):
@@ -104,6 +103,7 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
 # ==============================
 
 def listar_utilizadores():
+    carregar_utilizadores()
     if not utilizadores:
         return 404, "Nao existem utilizadores registados"
     return 200, utilizadores
@@ -114,6 +114,7 @@ def listar_utilizadores():
 # ==============================
 
 def consultar_utilizador(id_utilizador):
+    carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     return 200, utilizadores[id_utilizador]
@@ -124,6 +125,7 @@ def consultar_utilizador(id_utilizador):
 # ==============================
 
 def pesquisar_utilizadores(nome):
+    carregar_utilizadores()
     if not validar_pesquisa(nome):
         return 500, "Introduza um nome para pesquisar"
     encontrados = {}
@@ -140,6 +142,7 @@ def pesquisar_utilizadores(nome):
 # ==============================
 
 def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, estado_conta=None, generos=None):
+    carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
 
@@ -179,6 +182,7 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
 # ==============================
 
 def remover_utilizador(id_utilizador):
+    carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     del utilizadores[id_utilizador]
@@ -191,6 +195,7 @@ def remover_utilizador(id_utilizador):
 # ==============================
 
 def unfollow_artista(id_utilizador, id_artista):
+    carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     if id_artista not in utilizadores[id_utilizador]["seguidos"]:
