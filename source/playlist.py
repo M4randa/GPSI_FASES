@@ -15,34 +15,32 @@ from utils import (
     validar_descricao,
     validar_booleano
 )
-from utilizadores import utilizadores, guardar_utilizadores
-from musica import musicas
+from utilizadores import utilizadores, guardar_utilizadores, carregar_utilizadores
+from musica import musicas, carregar_musicas
+
+FICHEIRO_PLAYLISTS = "playlists.json"
 
 playlists = {}
 
 _contador_playlists = 1
 
-_FICHEIRO = "playlists.json"
-
 
 # ==============================
-# JSON
+# PERSISTENCIA
 # ==============================
 
 def guardar_playlists():
-    dados = {"contador": _contador_playlists, "playlists": playlists}
-    with open(_FICHEIRO, "w", encoding="utf-8") as f:
-        json.dump(dados, f, indent=4, ensure_ascii=False)
+    with open(FICHEIRO_PLAYLISTS, "w", encoding="utf-8") as f:
+        json.dump(playlists, f, indent=4, ensure_ascii=False)
 
 
 def carregar_playlists():
-    global playlists, _contador_playlists
-    if not os.path.exists(_FICHEIRO):
-        return
-    with open(_FICHEIRO, "r", encoding="utf-8") as f:
-        dados = json.load(f)
-    _contador_playlists = dados["contador"]
-    playlists            = dados["playlists"]
+    global playlists
+    if os.path.exists(FICHEIRO_PLAYLISTS):
+        with open(FICHEIRO_PLAYLISTS, "r", encoding="utf-8") as f:
+            playlists = json.load(f)
+    else:
+        playlists = {}
 
 
 def _gerar_id_playlist():
@@ -57,6 +55,8 @@ def _gerar_id_playlist():
 # ==============================
 
 def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_playlist):
+    carregar_playlists()
+    carregar_utilizadores()
     if not validar_nome(nome_playlist):
         return 500, "Nome invalido"
     if id_utilizador not in utilizadores:
@@ -70,20 +70,19 @@ def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_pl
 
     id_playlist = _gerar_id_playlist()
     playlist = {
-        "id_playlist":          id_playlist,
-        "nome_playlist":        nome_playlist,
-        "id_utilizador":        id_utilizador,
-        "privacidade":          privacidade,
-        "lista_ids":            [],
-        "descricao":            descricao,
-        "capa_playlist":        capa_playlist,
-        "data_criacao":         date.today().strftime("%d/%m/%Y"),
-        "seguidores_playlist":  [],
-        "ordem_musicas":        [],
-        "flag_remocao":         False,
+        "id_playlist":         id_playlist,
+        "nome_playlist":       nome_playlist,
+        "id_utilizador":       id_utilizador,
+        "privacidade":         privacidade,
+        "lista_ids":           [],
+        "descricao":           descricao,
+        "capa_playlist":       capa_playlist,
+        "data_criacao":        date.today().strftime("%d/%m/%Y"),
+        "seguidores_playlist": [],
+        "ordem_musicas":       [],
+        "flag_remocao":        False,
     }
     playlists[id_playlist] = playlist
-    # ligamos a playlist ao utilizador
     utilizadores[id_utilizador]["playlists_publicas"].append(id_playlist)
     guardar_playlists()
     guardar_utilizadores()
@@ -95,6 +94,7 @@ def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_pl
 # ==============================
 
 def listar_playlists():
+    carregar_playlists()
     if not playlists:
         return 404, "Nao existem playlists registadas"
     return 200, playlists
@@ -105,6 +105,7 @@ def listar_playlists():
 # ==============================
 
 def consultar_playlist(id_playlist):
+    carregar_playlists()
     if id_playlist not in playlists:
         return 404, "Playlist nao encontrada"
     return 200, playlists[id_playlist]
@@ -115,6 +116,7 @@ def consultar_playlist(id_playlist):
 # ==============================
 
 def atualizar_playlist(id_playlist, nome_playlist=None, privacidade=None, descricao=None, flag_remocao=None):
+    carregar_playlists()
     if id_playlist not in playlists:
         return 404, "Playlist nao encontrada"
 
@@ -147,6 +149,8 @@ def atualizar_playlist(id_playlist, nome_playlist=None, privacidade=None, descri
 # ==============================
 
 def adicionar_musica_playlist(id_playlist, id_musica):
+    carregar_playlists()
+    carregar_musicas()
     if id_playlist not in playlists:
         return 404, "Playlist nao encontrada"
     if id_musica not in musicas:
@@ -164,6 +168,7 @@ def adicionar_musica_playlist(id_playlist, id_musica):
 # ==============================
 
 def remover_musica_playlist(id_playlist, id_musica):
+    carregar_playlists()
     if id_playlist not in playlists:
         return 404, "Playlist nao encontrada"
     if id_musica not in playlists[id_playlist]["lista_ids"]:
@@ -180,6 +185,7 @@ def remover_musica_playlist(id_playlist, id_musica):
 # ==============================
 
 def remover_playlist(id_playlist):
+    carregar_playlists()
     if id_playlist not in playlists:
         return 404, "Playlist nao encontrada"
     del playlists[id_playlist]
@@ -192,6 +198,8 @@ def remover_playlist(id_playlist):
 # ==============================
 
 def seguir_playlist(id_utilizador, id_playlist):
+    carregar_playlists()
+    carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     if id_playlist not in playlists:
