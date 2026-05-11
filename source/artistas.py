@@ -21,33 +21,31 @@ from utils import (
     validar_escolha,
     validar_pesquisa
 )
-from utilizadores import utilizadores, guardar_utilizadores
+from utilizadores import utilizadores, guardar_utilizadores, carregar_utilizadores
+
+FICHEIRO_ARTISTAS = "artistas.json"
 
 artistas = {}
 
 _contador_artistas = 1
 
-_FICHEIRO = "artistas.json"
-
 
 # ==============================
-# JSON
+# PERSISTENCIA
 # ==============================
 
 def guardar_artistas():
-    dados = {"contador": _contador_artistas, "artistas": artistas}
-    with open(_FICHEIRO, "w", encoding="utf-8") as f:
-        json.dump(dados, f, indent=4, ensure_ascii=False)
+    with open(FICHEIRO_ARTISTAS, "w", encoding="utf-8") as f:
+        json.dump(artistas, f, indent=4, ensure_ascii=False)
 
 
 def carregar_artistas():
-    global artistas, _contador_artistas
-    if not os.path.exists(_FICHEIRO):
-        return
-    with open(_FICHEIRO, "r", encoding="utf-8") as f:
-        dados = json.load(f)
-    _contador_artistas = dados["contador"]
-    artistas            = dados["artistas"]
+    global artistas
+    if os.path.exists(FICHEIRO_ARTISTAS):
+        with open(FICHEIRO_ARTISTAS, "r", encoding="utf-8") as f:
+            artistas = json.load(f)
+    else:
+        artistas = {}
 
 
 def _gerar_id_artista():
@@ -62,6 +60,7 @@ def _gerar_id_artista():
 # ==============================
 
 def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
+    carregar_artistas()
     if not validar_nome(nome):
         return 500, "Nome invalido. Minimo 2 caracteres"
     for a in artistas.values():
@@ -103,6 +102,7 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
 # ==============================
 
 def listar_artistas():
+    carregar_artistas()
     if not artistas:
         return 404, "Nao existem artistas registados"
     return 200, artistas
@@ -113,6 +113,7 @@ def listar_artistas():
 # ==============================
 
 def consultar_artista(id_artista):
+    carregar_artistas()
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
     return 200, artistas[id_artista]
@@ -123,6 +124,7 @@ def consultar_artista(id_artista):
 # ==============================
 
 def pesquisar_artistas(nome):
+    carregar_artistas()
     if not validar_pesquisa(nome):
         return 500, "Introduza um nome para pesquisar"
     encontrados = {}
@@ -139,6 +141,7 @@ def pesquisar_artistas(nome):
 # ==============================
 
 def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=None, genero=None, verificado=None, ouvintes_mensais=None, escolha_artista=None):
+    carregar_artistas()
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
 
@@ -191,6 +194,7 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
 # ==============================
 
 def adicionar_lancamento(id_artista, titulo, tipo, ano):
+    carregar_artistas()
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
     if not validar_titulo(titulo):
@@ -209,6 +213,7 @@ def adicionar_lancamento(id_artista, titulo, tipo, ano):
 # ==============================
 
 def adicionar_top_faixa(id_artista, faixa):
+    carregar_artistas()
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
     if len(artistas[id_artista]["top_faixas"]) >= 5:
@@ -227,6 +232,7 @@ def adicionar_top_faixa(id_artista, faixa):
 # ==============================
 
 def remover_artista(id_artista):
+    carregar_artistas()
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
     del artistas[id_artista]
@@ -239,6 +245,8 @@ def remover_artista(id_artista):
 # ==============================
 
 def seguir_artista(id_utilizador, id_artista):
+    carregar_artistas()
+    carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     if id_artista not in artistas:
