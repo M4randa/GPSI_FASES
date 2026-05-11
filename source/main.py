@@ -1,3 +1,4 @@
+
 # ==============================
 # main.py
 # menu terminal para testar CRUD
@@ -43,10 +44,6 @@ from Playlist import (
     remover_playlist,
     seguir_playlist
 )
-from utilizadores import carregar_utilizadores
-from artistas import carregar_artistas
-from musica import carregar_musicas
-from Playlist import carregar_playlists
 
 
 # ==============================
@@ -566,11 +563,6 @@ def menu_playlists():
 def main():
     print("\n===== SPOTIFY MANAGER =====")
     print("Abel Chongolola | GPSI 10A | N 01")
-
-    carregar_utilizadores()
-    carregar_artistas()
-    carregar_musicas()
-    carregar_playlists()
 
     while True:
         print("\n===== MENU PRINCIPAL =====")
