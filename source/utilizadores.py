@@ -9,6 +9,7 @@ import json
 import os
 from datetime import date
 from utils import (
+    gerar_id_utilizador,
     validar_nome,
     validar_url,
     validar_pais,
@@ -43,7 +44,7 @@ def carregar_utilizadores():
         utilizadores = {}
 
 
-def _gerar_id_utilizador():
+def gerar_id_utilizador():
     global _contador_utilizadores
     novo_id = "U" + str(_contador_utilizadores).zfill(3)
     _contador_utilizadores += 1
@@ -76,7 +77,7 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
     if not validar_estado_conta(estado_conta):
         return 500, "Estado invalido. Opcoes: ativo, inativo, premium"
 
-    id_utilizador = _gerar_id_utilizador()
+    id_utilizador = gerar_id_utilizador()
     data_registro = date.today().strftime("%d/%m/%Y")
     utilizador = {
         "id_utilizador":      id_utilizador,
