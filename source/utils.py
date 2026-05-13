@@ -1,8 +1,41 @@
 # ==============================
 # utils.py
-# TODAS as validacoes de formato
+# geradores de ID e validacoes
 # importado por todos os modulos
 # ==============================
+
+_contador_utilizadores = 1
+_contador_artistas     = 1
+_contador_musicas      = 1
+_contador_playlists    = 1
+
+
+def gerar_id_utilizador():
+    global _contador_utilizadores
+    novo_id = "U" + str(_contador_utilizadores).zfill(3)
+    _contador_utilizadores += 1
+    return novo_id
+
+
+def gerar_id_artista():
+    global _contador_artistas
+    novo_id = "A" + str(_contador_artistas).zfill(3)
+    _contador_artistas += 1
+    return novo_id
+
+
+def gerar_id_musica():
+    global _contador_musicas
+    novo_id = "M" + str(_contador_musicas).zfill(3)
+    _contador_musicas += 1
+    return novo_id
+
+
+def gerar_id_playlist():
+    global _contador_playlists
+    novo_id = "P" + str(_contador_playlists).zfill(3)
+    _contador_playlists += 1
+    return novo_id
 
 
 def validar_nome(nome):
