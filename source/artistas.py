@@ -8,6 +8,7 @@
 import json
 import os
 from utils import (
+    gerar_id_artista,
     validar_nome,
     validar_url,
     validar_genero,
@@ -48,7 +49,7 @@ def carregar_artistas():
         artistas = {}
 
 
-def _gerar_id_artista():
+def gerar_id_artista():
     global _contador_artistas
     novo_id = "A" + str(_contador_artistas).zfill(3)
     _contador_artistas += 1
@@ -77,7 +78,7 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
     if not validar_verificado(verificado):
         return 500, "Verificado invalido. Use s ou n"
 
-    id_artista = _gerar_id_artista()
+    id_artista = gerar_id_artista()
     artistas[id_artista] = {
         "id_artista":       id_artista,
         "nome":             nome,
