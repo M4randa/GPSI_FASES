@@ -9,6 +9,7 @@ import json
 import os
 from datetime import date
 from utils import (
+    gerar_id_playlist,
     validar_nome,
     validar_url,
     validar_privacidade,
@@ -43,7 +44,7 @@ def carregar_playlists():
         playlists = {}
 
 
-def _gerar_id_playlist():
+def gerar_id_playlist():
     global _contador_playlists
     novo_id = "P" + str(_contador_playlists).zfill(3)
     _contador_playlists += 1
@@ -68,7 +69,7 @@ def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_pl
     if not validar_url(capa_playlist):
         return 500, "URL da capa invalido"
 
-    id_playlist = _gerar_id_playlist()
+    id_playlist = gerar_id_playlist()
     playlist = {
         "id_playlist":         id_playlist,
         "nome_playlist":       nome_playlist,
