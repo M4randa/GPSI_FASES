@@ -8,6 +8,7 @@
 import json
 import os
 from utils import (
+    gerar_id_musica,
     validar_nome,
     validar_duracao,
     validar_isrc,
@@ -45,7 +46,7 @@ def carregar_musicas():
         musicas = {}
 
 
-def _gerar_id_musica():
+def gerar_id_musica():
     global _contador_musicas
     novo_id = "M" + str(_contador_musicas).zfill(3)
     _contador_musicas += 1
@@ -80,7 +81,7 @@ def criar_musica(titulo, id_artista, duracao_ms, isrc, data_lancamento, letra, b
     if not validar_booleano(disponibilidade):
         return 500, "Disponibilidade invalida. Use s ou n"
 
-    id_musica = _gerar_id_musica()
+    id_musica = gerar_id_musica()
     musica = {
         "id_musica":            id_musica,
         "titulo":               titulo,
