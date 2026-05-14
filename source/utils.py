@@ -1,14 +1,45 @@
 # ==============================
 # utils.py
-# TODAS as validacoes de formato
-# importado por utilizadores.py e artistas.py
+# geradores de ID e validacoes
+# importado por todos os modulos
 # ==============================
 
-from datetime import datetime
+_contador_utilizadores = 1
+_contador_artistas     = 1
+_contador_musicas      = 1
+_contador_playlists    = 1
+
+
+def gerar_id_utilizador():
+    global _contador_utilizadores
+    novo_id = "U" + str(_contador_utilizadores).zfill(3)
+    _contador_utilizadores += 1
+    return novo_id
+
+
+def gerar_id_artista():
+    global _contador_artistas
+    novo_id = "A" + str(_contador_artistas).zfill(3)
+    _contador_artistas += 1
+    return novo_id
+
+
+def gerar_id_musica():
+    global _contador_musicas
+    novo_id = "M" + str(_contador_musicas).zfill(3)
+    _contador_musicas += 1
+    return novo_id
+
+
+def gerar_id_playlist():
+    global _contador_playlists
+    novo_id = "P" + str(_contador_playlists).zfill(3)
+    _contador_playlists += 1
+    return novo_id
 
 
 def validar_nome(nome):
-    if len(nome.strip()) < 2:
+    if len(nome) < 2:
         return False
     return True
 
@@ -27,11 +58,17 @@ def validar_data(data):
         return False
     if data[2] != "/" or data[5] != "/":
         return False
-    try:
-        dt = datetime.strptime(data, "%d/%m/%Y")
-    except ValueError:
+    dia = data[0:2]
+    mes = data[3:5]
+    ano = data[6:10]
+    for c in dia + mes + ano:
+        if c < "0" or c > "9":
+            return False
+    if int(dia) < 1 or int(dia) > 31:
         return False
-    if dt.year < 1900 or dt.year > 2025:
+    if int(mes) < 1 or int(mes) > 12:
+        return False
+    if int(ano) < 1900 or int(ano) > 2025:
         return False
     return True
 
@@ -48,9 +85,9 @@ def validar_estado_conta(estado):
 
 
 def validar_pais(pais):
-    if len(pais.strip()) < 2:
+    if len(pais) < 2:
         return False
-    for c in pais.strip():
+    for c in pais:
         if c >= "0" and c <= "9":
             return False
     return True
@@ -65,9 +102,9 @@ def validar_generos(generos):
 
 
 def validar_genero(genero):
-    if len(genero.strip()) < 2:
+    if len(genero) < 2:
         return False
-    for c in genero.strip():
+    for c in genero:
         if c >= "0" and c <= "9":
             return False
     return True
@@ -85,8 +122,9 @@ def validar_ouvintes(valor):
 def validar_ano(ano):
     if len(ano) != 4:
         return False
-    if not ano.isdigit():
-        return False
+    for c in ano:
+        if c < "0" or c > "9":
+            return False
     if int(ano) < 1900 or int(ano) > 2025:
         return False
     return True
@@ -113,123 +151,91 @@ def validar_verificado(valor):
 
 
 def validar_biografia(bio):
-    if len(bio.strip()) < 5:
+    if len(bio) < 5:
         return False
     return True
 
 
 def validar_titulo(titulo):
-    if len(titulo.strip()) < 1:
+    if len(titulo) < 1:
         return False
     return True
 
 
 def validar_faixa(faixa):
-    if len(faixa.strip()) < 1:
+    if len(faixa) < 1:
         return False
     return True
 
 
 def validar_escolha(escolha):
-    if len(escolha.strip()) < 1:
+    if len(escolha) < 1:
         return False
     return True
 
 
 def validar_pesquisa(termo):
-    if len(termo.strip()) == 0:
-# ==============================
-# VALIDAÇÕES PARA musicas.py
-# ==============================
-
-def validar_duracao(duracao_ms):
-    """Valida duração (deve ser um número inteiro positivo)"""
-    try:
-        valor = int(duracao_ms)
-        return valor > 0
-    except (ValueError, TypeError):
+    if len(termo) == 0:
         return False
+    return True
+
+
+def validar_duracao(valor):
+    # duracao em milissegundos - numero inteiro positivo
+    if len(str(valor)) == 0:
+        return False
+    for c in str(valor):
+        if c < "0" or c > "9":
+            return False
+    if int(valor) <= 0:
+        return False
+    return True
 
 
 def validar_isrc(isrc):
-    """Valida código ISRC (formato: 2 letras + 3 letras + 2 dígitos + 5 dígitos)"""
-    if not isinstance(isrc, str):
-        return False
+    # formato: 12 caracteres alfanumericos
     if len(isrc) != 12:
         return False
-    # Primeiros 2 caracteres: letras
-    if not isrc[0:2].isalpha():
+    return True
+
+
+def validar_bitrate(valor):
+    # bitrate em kbps - numero inteiro positivo
+    if len(str(valor)) == 0:
         return False
-    # Próximos 3 caracteres: letras
-    if not isrc[2:5].isalpha():
-        return False
-    # Próximos 2 caracteres: dígitos
-    if not isrc[5:7].isdigit():
-        return False
-    # Últimos 5 caracteres: dígitos
-    if not isrc[7:12].isdigit():
+    for c in str(valor):
+        if c < "0" or c > "9":
+            return False
+    if int(valor) <= 0:
         return False
     return True
 
 
 def validar_letra(letra):
-    """Valida letra da música (mínimo 5 caracteres)"""
-    if len(letra.strip()) < 5:
+    if len(letra) < 5:
         return False
     return True
 
 
-def validar_bitrate(bitrate):
-    """Valida bitrate (deve ser 128, 192, 256, 320)"""
-    try:
-        valor = int(bitrate)
-        return valor in [128, 192, 256, 320]
-    except (ValueError, TypeError):
-        return False
-
-
-def validar_reproducoes(reproducoes):
-    """Valida contagem de reproduções (número inteiro não negativo)"""
-    try:
-        valor = int(reproducoes)
-        return valor >= 0
-    except (ValueError, TypeError):
-        return False
-
-
 def validar_booleano(valor):
-    """Valida se o valor pode ser convertido para booleano"""
-    if isinstance(valor, bool):
+    if valor == "s":
         return True
-    if isinstance(valor, str):
-        if valor.lower() in ["true", "false", "1", "0", "s", "n", "sim", "nao"]:
-            return True
-    if isinstance(valor, int):
-        if valor in [0, 1]:
-            return True
-    return False
-
-
-# ==============================
-# VALIDAÇÕES PARA playlists.py
-# ==============================
-
-def validar_privacidade(privacidade):
-    """Valida privacidade da playlist: publica ou privada"""
-    if privacidade == "publica":
+    elif valor == "n":
         return True
-    elif privacidade == "privada":
+    else:
+        return False
+
+
+def validar_privacidade(valor):
+    if valor == "publica":
+        return True
+    elif valor == "privada":
         return True
     else:
         return False
 
 
 def validar_descricao(descricao):
-    """Valida descrição (mínimo 5 caracteres, máximo 500)"""
-    if len(descricao.strip()) < 5:
-        return False
-    if len(descricao) > 500:
-        return False
-    return True
+    if len(descricao) < 1:
         return False
     return True

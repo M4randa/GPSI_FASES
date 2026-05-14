@@ -5,8 +5,11 @@
 # devolve codigos HTTP (200, 201, 404, 500)
 # ==============================
 
+import json
+import os
 from datetime import date
 from utils import (
+    gerar_id_utilizador,
     validar_nome,
     validar_url,
     validar_pais,
@@ -16,12 +19,30 @@ from utils import (
     validar_pesquisa
 )
 
+FICHEIRO_UTILIZADORES = "utilizadores.json"
+
 utilizadores = {}
 
 _contador_utilizadores = 1
 
 
-def _gerar_id_utilizador():
+# ==============================
+# PERSISTENCIA
+# ==============================
+
+def guardar_utilizadores():
+    with open(FICHEIRO_UTILIZADORES, "w", encoding="utf-8") as f:
+        json.dump(utilizadores, f, indent=4, ensure_ascii=False)
+
+
+def carregar_utilizadores():
+    if os.path.exists(FICHEIRO_UTILIZADORES):
+        with open(FICHEIRO_UTILIZADORES, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+def gerar_id_utilizador():
     global _contador_utilizadores
     novo_id = "U" + str(_contador_utilizadores).zfill(3)
     _contador_utilizadores += 1
@@ -33,6 +54,7 @@ def _gerar_id_utilizador():
 # ==============================
 
 def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, generos, estado_conta):
+    utilizadores = carregar_utilizadores()
     if not validar_nome(nome):
         return 500, "Nome invalido. Minimo 2 caracteres"
     if not validar_nome(nome_utilizador):
@@ -53,7 +75,7 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
     if not validar_estado_conta(estado_conta):
         return 500, "Estado invalido. Opcoes: ativo, inativo, premium"
 
-    id_utilizador = _gerar_id_utilizador()
+    id_utilizador = gerar_id_utilizador()
     data_registro = date.today().strftime("%d/%m/%Y")
     utilizador = {
         "id_utilizador":      id_utilizador,
@@ -71,7 +93,7 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
         "historico_consumo":  [],
     }
     utilizadores[id_utilizador] = utilizador
-
+    guardar_utilizadores()
     return 201, utilizador
 
 
@@ -80,6 +102,7 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
 # ==============================
 
 def listar_utilizadores():
+    utilizadores = carregar_utilizadores()
     if not utilizadores:
         return 404, "Nao existem utilizadores registados"
     return 200, utilizadores
@@ -90,6 +113,7 @@ def listar_utilizadores():
 # ==============================
 
 def consultar_utilizador(id_utilizador):
+    utilizadores = carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     return 200, utilizadores[id_utilizador]
@@ -100,6 +124,7 @@ def consultar_utilizador(id_utilizador):
 # ==============================
 
 def pesquisar_utilizadores(nome):
+    utilizadores = carregar_utilizadores()
     if not validar_pesquisa(nome):
         return 500, "Introduza um nome para pesquisar"
     encontrados = {}
@@ -116,6 +141,7 @@ def pesquisar_utilizadores(nome):
 # ==============================
 
 def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, estado_conta=None, generos=None):
+    utilizadores = carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
 
@@ -146,6 +172,7 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
             return 500, "Generos invalidos"
         utilizadores[id_utilizador]["generos_preferidos"] = [g.strip() for g in generos.split(",")]
 
+    guardar_utilizadores()
     return 200, utilizadores[id_utilizador]
 
 
@@ -154,9 +181,11 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
 # ==============================
 
 def remover_utilizador(id_utilizador):
+    utilizadores = carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     del utilizadores[id_utilizador]
+    guardar_utilizadores()
     return 200, id_utilizador
 
 
@@ -165,9 +194,11 @@ def remover_utilizador(id_utilizador):
 # ==============================
 
 def unfollow_artista(id_utilizador, id_artista):
+    utilizadores = carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     if id_artista not in utilizadores[id_utilizador]["seguidos"]:
         return 404, "O utilizador nao segue este artista"
     utilizadores[id_utilizador]["seguidos"].remove(id_artista)
+    guardar_utilizadores()
     return 200, utilizadores[id_utilizador]
