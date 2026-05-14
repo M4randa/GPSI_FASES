@@ -8,6 +8,7 @@
 import json
 import os
 from datetime import date
+from utilizadores import carregar_utilizadores
 from utils import (
     gerar_id_playlist,
     validar_nome,
@@ -198,7 +199,6 @@ def remover_playlist(id_playlist):
 
 def seguir_playlist(id_utilizador, id_playlist):
     playlists = carregar_playlists()
-    from utilizadores import carregar_utilizadores
     utilizadores = carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
