@@ -18,8 +18,6 @@ from utils import (
     validar_booleano,
     validar_pesquisa
 )
-from artistas import artistas, carregar_artistas
-from utilizadores import utilizadores, guardar_utilizadores, carregar_utilizadores
 
 FICHEIRO_MUSICAS = "musicas.json"
 
@@ -38,12 +36,10 @@ def guardar_musicas():
 
 
 def carregar_musicas():
-    global musicas
     if os.path.exists(FICHEIRO_MUSICAS):
         with open(FICHEIRO_MUSICAS, "r", encoding="utf-8") as f:
-            musicas = json.load(f)
-    else:
-        musicas = {}
+            return json.load(f)
+    return {}
 
 
 def gerar_id_musica():
@@ -58,8 +54,9 @@ def gerar_id_musica():
 # ==============================
 
 def criar_musica(titulo, id_artista, duracao_ms, isrc, data_lancamento, letra, bitrate, flag_explicito, status_takedown, disponibilidade):
-    carregar_musicas()
-    carregar_artistas()
+    musicas = carregar_musicas()
+    from artistas import carregar_artistas
+    artistas = carregar_artistas()
     if not validar_nome(titulo):
         return 500, "Titulo invalido. Minimo 2 caracteres"
     if id_artista not in artistas:
@@ -106,7 +103,7 @@ def criar_musica(titulo, id_artista, duracao_ms, isrc, data_lancamento, letra, b
 # ==============================
 
 def listar_musicas():
-    carregar_musicas()
+    musicas = carregar_musicas()
     if not musicas:
         return 404, "Nao existem musicas registadas"
     return 200, musicas
@@ -117,7 +114,7 @@ def listar_musicas():
 # ==============================
 
 def consultar_musica(id_musica):
-    carregar_musicas()
+    musicas = carregar_musicas()
     if id_musica not in musicas:
         return 404, "Musica nao encontrada"
     return 200, musicas[id_musica]
@@ -128,7 +125,7 @@ def consultar_musica(id_musica):
 # ==============================
 
 def pesquisar_musicas(nome):
-    carregar_musicas()
+    musicas = carregar_musicas()
     if not validar_pesquisa(nome):
         return 500, "Introduza um titulo para pesquisar"
     encontrados = {}
@@ -145,7 +142,7 @@ def pesquisar_musicas(nome):
 # ==============================
 
 def atualizar_musica(id_musica, titulo=None, duracao_ms=None, letra=None, bitrate=None, flag_explicito=None, disponibilidade=None):
-    carregar_musicas()
+    musicas = carregar_musicas()
     if id_musica not in musicas:
         return 404, "Musica nao encontrada"
 
@@ -188,8 +185,9 @@ def atualizar_musica(id_musica, titulo=None, duracao_ms=None, letra=None, bitrat
 # ==============================
 
 def registar_reproducao(id_musica, id_utilizador):
-    carregar_musicas()
-    carregar_utilizadores()
+    musicas = carregar_musicas()
+    from utilizadores import carregar_utilizadores, guardar_utilizadores
+    utilizadores = carregar_utilizadores()
     if id_musica not in musicas:
         return 404, "Musica nao encontrada"
     if id_utilizador not in utilizadores:
@@ -210,7 +208,7 @@ def registar_reproducao(id_musica, id_utilizador):
 # ==============================
 
 def remover_musica(id_musica):
-    carregar_musicas()
+    musicas = carregar_musicas()
     if id_musica not in musicas:
         return 404, "Musica nao encontrada"
     del musicas[id_musica]
