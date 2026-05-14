@@ -7,6 +7,7 @@
 
 import json
 import os
+from utilizadores import carregar_utilizadores, guardar_utilizadores
 from utils import (
     gerar_id_musica,
     validar_nome,
@@ -186,7 +187,6 @@ def atualizar_musica(id_musica, titulo=None, duracao_ms=None, letra=None, bitrat
 
 def registar_reproducao(id_musica, id_utilizador):
     musicas = carregar_musicas()
-    from utilizadores import carregar_utilizadores, guardar_utilizadores
     utilizadores = carregar_utilizadores()
     if id_musica not in musicas:
         return 404, "Musica nao encontrada"
