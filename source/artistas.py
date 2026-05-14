@@ -7,6 +7,7 @@
 
 import json
 import os
+from utilizadores import carregar_utilizadores
 from utils import (
     gerar_id_artista,
     validar_nome,
@@ -244,7 +245,6 @@ def remover_artista(id_artista):
 
 def seguir_artista(id_utilizador, id_artista):
     artistas = carregar_artistas()
-    from utilizadores import carregar_utilizadores
     utilizadores = carregar_utilizadores()
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
