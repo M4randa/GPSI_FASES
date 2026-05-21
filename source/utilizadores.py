@@ -1,142 +1,134 @@
 # ==============================
-# musica.py
-# CRUD da entidade Musica
+# utilizadores.py
+# CRUD da entidade Utilizador
 # SEM prints nem inputs
 # devolve codigos HTTP (200, 201, 404, 500)
 # ==============================
 
 import json
 import os
+from datetime import date
 from utils import (
-    gerar_id_musica,
+    configurar_logger,
+    gerar_id_utilizador,
     validar_nome,
-    validar_duracao,
-    validar_isrc,
+    validar_url,
+    validar_pais,
     validar_data,
-    validar_letra,
-    validar_bitrate,
-    validar_booleano,
+    validar_generos,
+    validar_estado_conta,
     validar_pesquisa
 )
 
-FICHEIRO_MUSICAS = "musicas.json"
-
-musicas = {}
+FICHEIRO_UTILIZADORES = "utilizadores.json"
 
 logger = configurar_logger()
-
-_contador_musicas = 1
 
 
 # ==============================
 # PERSISTENCIA
 # ==============================
 
-def guardar_musicas():
-    with open(FICHEIRO_MUSICAS, "w", encoding="utf-8") as f:
-        json.dump(musicas, f, indent=4, ensure_ascii=False)
+def guardar_utilizadores(utilizadores):
+    with open(FICHEIRO_UTILIZADORES, "w", encoding="utf-8") as f:
+        json.dump(utilizadores, f, indent=4, ensure_ascii=False)
 
 
-def carregar_musicas():
-    if os.path.exists(FICHEIRO_MUSICAS):
-        with open(FICHEIRO_MUSICAS, "r", encoding="utf-8") as f:
+def carregar_utilizadores():
+    if os.path.exists(FICHEIRO_UTILIZADORES):
+        with open(FICHEIRO_UTILIZADORES, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
-
-
-def gerar_id_musica():
-    global _contador_musicas
-    novo_id = "M" + str(_contador_musicas).zfill(3)
-    _contador_musicas += 1
-    return novo_id
 
 
 # ==============================
 # CREATE
 # ==============================
 
-def criar_musica(titulo, id_artista, duracao_ms, isrc, data_lancamento, letra, bitrate, flag_explicito, status_takedown, disponibilidade):
-    musicas = carregar_musicas()
-    artistas = carregar_artistas()
-    if not validar_nome(titulo):
-        return 500, "Titulo invalido. Minimo 2 caracteres"
-    if id_artista not in artistas:
-        logger.error("Artista nao encontrado: " + id_artista)
-        return 404, "Artista nao encontrado"
-    if not validar_duracao(duracao_ms):
-        return 500, "Duracao invalida. Deve ser um numero inteiro positivo"
-    if not validar_isrc(isrc):
-        return 500, "Codigo ISRC invalido. Deve ter 12 caracteres"
-    if not validar_data(data_lancamento):
-        return 500, "Data invalida. Use DD/MM/AAAA"
-    if not validar_letra(letra):
-        return 500, "Letra invalida. Minimo 5 caracteres"
-    if not validar_bitrate(bitrate):
-        return 500, "Bitrate invalido. Exemplo: 320"
-    if not validar_booleano(flag_explicito):
-        return 500, "Flag explicito invalida. Use s ou n"
-    if not validar_booleano(status_takedown):
-        return 500, "Status takedown invalido. Use s ou n"
-    if not validar_booleano(disponibilidade):
-        return 500, "Disponibilidade invalida. Use s ou n"
+def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, generos, estado_conta):
+    utilizadores = carregar_utilizadores()
+    if not validar_nome(nome):
+        logger.warning("Nome invalido: " + nome)
+        return 500, "Nome invalido. Minimo 2 caracteres"
+    if not validar_nome(nome_utilizador):
+        return 500, "Nome de utilizador invalido"
+    if nome.strip().lower() == nome_utilizador.strip().lower():
+        logger.warning("Nome exibicao igual ao username: " + nome)
+        return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
+    for u in utilizadores.values():
+        if u["nome_utilizador"] == nome_utilizador:
+            logger.warning("Username ja em uso: " + nome_utilizador)
+            return 500, "Nome de utilizador ja esta em uso"
+    if not validar_url(foto_perfil):
+        return 500, "URL invalido"
+    if not validar_pais(pais):
+        return 500, "Pais invalido. Nao pode conter numeros"
+    if not validar_data(data_nascimento):
+        return 500, "Data invalida. Use formato DD/MM/AAAA"
+    if not validar_generos(generos):
+        return 500, "Generos invalidos. Minimo 2 caracteres por genero"
+    if not validar_estado_conta(estado_conta):
+        return 500, "Estado invalido. Opcoes: ativo, inativo, premium"
 
-    id_musica = gerar_id_musica()
-    musica = {
-        "id_musica":            id_musica,
-        "titulo":               titulo,
-        "id_artista":           id_artista,
-        "duracao_ms":           int(duracao_ms),
-        "isrc":                 isrc,
-        "data_lancamento":      data_lancamento,
-        "letra":                letra,
-        "bitrate":              int(bitrate),
-        "contagem_reproducoes": 0,
-        "flag_explicito":       flag_explicito == "s",
-        "status_takedown":      status_takedown == "s",
-        "disponibilidade":      disponibilidade == "s",
+    id_utilizador = gerar_id_utilizador()
+    data_registro = date.today().strftime("%d/%m/%Y")
+    utilizador = {
+        "id_utilizador":      id_utilizador,
+        "nome_exibicao":      nome,
+        "nome_utilizador":    nome_utilizador,
+        "foto_perfil":        foto_perfil,
+        "pais":               pais,
+        "data_nascimento":    data_nascimento,
+        "generos_preferidos": [g.strip() for g in generos.split(",")],
+        "data_registro":      data_registro,
+        "estado_conta":       estado_conta,
+        "seguidores":         [],
+        "seguidos":           [],
+        "playlists_publicas": [],
+        "historico_consumo":  [],
     }
-    musicas[id_musica] = musica
-    guardar_musicas()
-    logger.info("Musica criada: " + id_musica)
-    return 201, musica
+    utilizadores[id_utilizador] = utilizador
+    guardar_utilizadores(utilizadores)
+    logger.info("Utilizador criado: " + id_utilizador)
+    return 201, utilizador
 
 
 # ==============================
-# READ (listar todas)
+# READ (listar todos)
 # ==============================
 
-def listar_musicas():
-    musicas = carregar_musicas()
-    if not musicas:
-        return 404, "Nao existem musicas registadas"
-    return 200, musicas
+def listar_utilizadores():
+    utilizadores = carregar_utilizadores()
+    if not utilizadores:
+        return 404, "Nao existem utilizadores registados"
+    return 200, utilizadores
 
 
 # ==============================
 # READ (consultar individual)
 # ==============================
 
-def consultar_musica(id_musica):
-    musicas = carregar_musicas()
-    if id_musica not in musicas:
-        return 404, "Musica nao encontrada"
-    return 200, musicas[id_musica]
+def consultar_utilizador(id_utilizador):
+    utilizadores = carregar_utilizadores()
+    if id_utilizador not in utilizadores:
+        return 404, "Utilizador nao encontrado"
+    return 200, utilizadores[id_utilizador]
 
 
 # ==============================
-# READ (pesquisar por titulo)
+# READ (pesquisar por nome)
 # ==============================
 
-def pesquisar_musicas(nome):
-    musicas = carregar_musicas()
+def pesquisar_utilizadores(nome):
+    utilizadores = carregar_utilizadores()
     if not validar_pesquisa(nome):
-        return 500, "Introduza um titulo para pesquisar"
+        return 500, "Introduza um nome para pesquisar"
     encontrados = {}
-    for id_m, m in musicas.items():
-        if nome.lower() in m["titulo"].lower():
-            encontrados[id_m] = m
+    for id_u, u in utilizadores.items():
+        if nome.lower() in u["nome_exibicao"].lower() or nome.lower() in u["nome_utilizador"].lower():
+            encontrados[id_u] = u
     if not encontrados:
-        return 404, "Nenhuma musica encontrada"
+        return 404, "Nenhum utilizador encontrado com esse nome"
     return 200, encontrados
 
 
@@ -144,79 +136,68 @@ def pesquisar_musicas(nome):
 # UPDATE
 # ==============================
 
-def atualizar_musica(id_musica, titulo=None, duracao_ms=None, letra=None, bitrate=None, flag_explicito=None, disponibilidade=None):
-    musicas = carregar_musicas()
-    if id_musica not in musicas:
-        return 404, "Musica nao encontrada"
-
-    if titulo is not None:
-        if not validar_nome(titulo):
-            return 500, "Titulo invalido"
-        musicas[id_musica]["titulo"] = titulo
-
-    if duracao_ms is not None:
-        if not validar_duracao(duracao_ms):
-            return 500, "Duracao invalida"
-        musicas[id_musica]["duracao_ms"] = int(duracao_ms)
-
-    if letra is not None:
-        if not validar_letra(letra):
-            return 500, "Letra invalida"
-        musicas[id_musica]["letra"] = letra
-
-    if bitrate is not None:
-        if not validar_bitrate(bitrate):
-            return 500, "Bitrate invalido"
-        musicas[id_musica]["bitrate"] = int(bitrate)
-
-    if flag_explicito is not None:
-        if not validar_booleano(flag_explicito):
-            return 500, "Flag explicito invalida. Use s ou n"
-        musicas[id_musica]["flag_explicito"] = flag_explicito == "s"
-
-    if disponibilidade is not None:
-        if not validar_booleano(disponibilidade):
-            return 500, "Disponibilidade invalida. Use s ou n"
-        musicas[id_musica]["disponibilidade"] = disponibilidade == "s"
-
-    guardar_musicas()
-    logger.info("Musica atualizada: " + id_musica)
-    return 200, musicas[id_musica]
-
-
-# ==============================
-# UPDATE - registar reproducao
-# ==============================
-
-def registar_reproducao(id_musica, id_utilizador):
-    musicas = carregar_musicas()
+def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, estado_conta=None, generos=None):
     utilizadores = carregar_utilizadores()
-    if id_musica not in musicas:
-        return 404, "Musica nao encontrada"
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
-    if not musicas[id_musica]["disponibilidade"]:
-        logger.warning("Musica nao disponivel: " + id_musica)
-        return 500, "Musica nao disponivel"
-    if musicas[id_musica]["status_takedown"]:
-        return 500, "Musica removida por direitos autorais"
-    musicas[id_musica]["contagem_reproducoes"] += 1
-    utilizadores[id_utilizador]["historico_consumo"].append(id_musica)
-    logger.debug("Reproducao registada: musica " + id_musica + " por " + id_utilizador)
-    guardar_musicas()
-    guardar_utilizadores()
-    return 200, musicas[id_musica]
+
+    if nome is not None:
+        if not validar_nome(nome):
+            return 500, "Nome invalido. Minimo 2 caracteres"
+        if nome.strip().lower() == utilizadores[id_utilizador]["nome_utilizador"].strip().lower():
+            return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
+        utilizadores[id_utilizador]["nome_exibicao"] = nome
+
+    if foto_perfil is not None:
+        if not validar_url(foto_perfil):
+            return 500, "URL invalido"
+        utilizadores[id_utilizador]["foto_perfil"] = foto_perfil
+
+    if pais is not None:
+        if not validar_pais(pais):
+            return 500, "Pais invalido. Nao pode conter numeros"
+        utilizadores[id_utilizador]["pais"] = pais
+
+    if estado_conta is not None:
+        if not validar_estado_conta(estado_conta):
+            return 500, "Estado invalido. Opcoes: ativo, inativo, premium"
+        utilizadores[id_utilizador]["estado_conta"] = estado_conta
+
+    if generos is not None:
+        if not validar_generos(generos):
+            return 500, "Generos invalidos"
+        utilizadores[id_utilizador]["generos_preferidos"] = [g.strip() for g in generos.split(",")]
+
+    guardar_utilizadores(utilizadores)
+    logger.info("Utilizador atualizado: " + id_utilizador)
+    return 200, utilizadores[id_utilizador]
 
 
 # ==============================
 # DELETE
 # ==============================
 
-def remover_musica(id_musica):
-    musicas = carregar_musicas()
-    if id_musica not in musicas:
-        return 404, "Musica nao encontrada"
-    del musicas[id_musica]
-    guardar_musicas()
-    logger.info("Musica removida: " + id_musica)
-    return 200, id_musica
+def remover_utilizador(id_utilizador):
+    utilizadores = carregar_utilizadores()
+    if id_utilizador not in utilizadores:
+        return 404, "Utilizador nao encontrado"
+    del utilizadores[id_utilizador]
+    guardar_utilizadores(utilizadores)
+    logger.info("Utilizador removido: " + id_utilizador)
+    return 200, id_utilizador
+
+
+# ==============================
+# RELACAO: deixar de seguir artista
+# ==============================
+
+def unfollow_artista(id_utilizador, id_artista):
+    utilizadores = carregar_utilizadores()
+    if id_utilizador not in utilizadores:
+        return 404, "Utilizador nao encontrado"
+    if id_artista not in utilizadores[id_utilizador]["seguidos"]:
+        return 404, "O utilizador nao segue este artista"
+    utilizadores[id_utilizador]["seguidos"].remove(id_artista)
+    guardar_utilizadores(utilizadores)
+    logger.info("Utilizador " + id_utilizador + " deixou de seguir " + id_artista)
+    return 200, utilizadores[id_utilizador]
