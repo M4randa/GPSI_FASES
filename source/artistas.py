@@ -7,7 +7,6 @@
 
 import json
 import os
-from utilizadores import carregar_utilizadores
 from utils import (
     gerar_id_artista,
     validar_nome,
@@ -27,6 +26,8 @@ from utils import (
 FICHEIRO_ARTISTAS = "artistas.json"
 
 artistas = {}
+
+logger = configurar_logger()
 
 _contador_artistas = 1
 
@@ -64,6 +65,7 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
         return 500, "Nome invalido. Minimo 2 caracteres"
     for a in artistas.values():
         if a["nome"].lower() == nome.lower():
+            logger.warning("Artista ja existe: " + nome)
             return 500, "Ja existe um artista com esse nome"
     if not validar_biografia(bio):
         return 500, "Biografia demasiado curta. Minimo 5 caracteres"
@@ -93,6 +95,7 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
         "escolha_artista":  "",
     }
     guardar_artistas()
+    logger.info("Artista criado: " + id_artista)
     return 201, artistas[id_artista]
 
 
@@ -185,6 +188,7 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
         artistas[id_artista]["escolha_artista"] = escolha_artista
 
     guardar_artistas()
+    logger.info("Artista atualizado: " + id_artista)
     return 200, artistas[id_artista]
 
 
@@ -236,6 +240,7 @@ def remover_artista(id_artista):
         return 404, "Artista nao encontrado"
     del artistas[id_artista]
     guardar_artistas()
+    logger.info("Artista removido: " + id_artista)
     return 200, id_artista
 
 
@@ -255,6 +260,6 @@ def seguir_artista(id_utilizador, id_artista):
     utilizadores[id_utilizador]["seguidos"].append(id_artista)
     artistas[id_artista]["seguidores"].append(id_utilizador)
     guardar_artistas()
-    from utilizadores import guardar_utilizadores
+    logger.info("Utilizador " + id_utilizador + " segue artista " + id_artista)
     guardar_utilizadores()
     return 200, artistas[id_artista]
