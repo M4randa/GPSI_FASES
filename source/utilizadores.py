@@ -9,6 +9,7 @@ import json
 import os
 from datetime import date
 from utils import (
+    configurar_logger,
     gerar_id_utilizador,
     validar_nome,
     validar_url,
@@ -21,16 +22,14 @@ from utils import (
 
 FICHEIRO_UTILIZADORES = "utilizadores.json"
 
-utilizadores = {}
-
-_contador_utilizadores = 1
+logger = configurar_logger()
 
 
 # ==============================
 # PERSISTENCIA
 # ==============================
 
-def guardar_utilizadores():
+def guardar_utilizadores(utilizadores):
     with open(FICHEIRO_UTILIZADORES, "w", encoding="utf-8") as f:
         json.dump(utilizadores, f, indent=4, ensure_ascii=False)
 
@@ -42,13 +41,6 @@ def carregar_utilizadores():
     return {}
 
 
-def gerar_id_utilizador():
-    global _contador_utilizadores
-    novo_id = "U" + str(_contador_utilizadores).zfill(3)
-    _contador_utilizadores += 1
-    return novo_id
-
-
 # ==============================
 # CREATE
 # ==============================
@@ -56,13 +48,16 @@ def gerar_id_utilizador():
 def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, generos, estado_conta):
     utilizadores = carregar_utilizadores()
     if not validar_nome(nome):
+        logger.warning("Nome invalido: " + nome)
         return 500, "Nome invalido. Minimo 2 caracteres"
     if not validar_nome(nome_utilizador):
         return 500, "Nome de utilizador invalido"
     if nome.strip().lower() == nome_utilizador.strip().lower():
+        logger.warning("Nome exibicao igual ao username: " + nome)
         return 500, "Nome de exibicao nao pode ser igual ao nome de utilizador"
     for u in utilizadores.values():
         if u["nome_utilizador"] == nome_utilizador:
+            logger.warning("Username ja em uso: " + nome_utilizador)
             return 500, "Nome de utilizador ja esta em uso"
     if not validar_url(foto_perfil):
         return 500, "URL invalido"
@@ -93,7 +88,8 @@ def criar_utilizador(nome, nome_utilizador, foto_perfil, pais, data_nascimento, 
         "historico_consumo":  [],
     }
     utilizadores[id_utilizador] = utilizador
-    guardar_utilizadores()
+    guardar_utilizadores(utilizadores)
+    logger.info("Utilizador criado: " + id_utilizador)
     return 201, utilizador
 
 
@@ -172,7 +168,8 @@ def atualizar_utilizador(id_utilizador, nome=None, foto_perfil=None, pais=None, 
             return 500, "Generos invalidos"
         utilizadores[id_utilizador]["generos_preferidos"] = [g.strip() for g in generos.split(",")]
 
-    guardar_utilizadores()
+    guardar_utilizadores(utilizadores)
+    logger.info("Utilizador atualizado: " + id_utilizador)
     return 200, utilizadores[id_utilizador]
 
 
@@ -185,7 +182,8 @@ def remover_utilizador(id_utilizador):
     if id_utilizador not in utilizadores:
         return 404, "Utilizador nao encontrado"
     del utilizadores[id_utilizador]
-    guardar_utilizadores()
+    guardar_utilizadores(utilizadores)
+    logger.info("Utilizador removido: " + id_utilizador)
     return 200, id_utilizador
 
 
@@ -200,5 +198,6 @@ def unfollow_artista(id_utilizador, id_artista):
     if id_artista not in utilizadores[id_utilizador]["seguidos"]:
         return 404, "O utilizador nao segue este artista"
     utilizadores[id_utilizador]["seguidos"].remove(id_artista)
-    guardar_utilizadores()
+    guardar_utilizadores(utilizadores)
+    logger.info("Utilizador " + id_utilizador + " deixou de seguir " + id_artista)
     return 200, utilizadores[id_utilizador]

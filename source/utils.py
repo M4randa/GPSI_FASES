@@ -4,6 +4,18 @@
 # importado por todos os modulos
 # ==============================
 
+import logging
+
+
+def configurar_logger():
+    logging.basicConfig(
+        filename="spotify.log",
+        level=logging.DEBUG,
+        format="%(asctime)s %(levelname)s %(message)s"
+    )
+    return logging.getLogger("spotify")
+
+
 _contador_utilizadores = 1
 _contador_artistas     = 1
 _contador_musicas      = 1

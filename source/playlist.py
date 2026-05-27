@@ -8,8 +8,8 @@
 import json
 import os
 from datetime import date
-from utilizadores import carregar_utilizadores
 from utils import (
+    configurar_logger,
     gerar_id_playlist,
     validar_nome,
     validar_url,
@@ -20,16 +20,14 @@ from utils import (
 
 FICHEIRO_PLAYLISTS = "playlists.json"
 
-playlists = {}
-
-_contador_playlists = 1
+logger = configurar_logger()
 
 
 # ==============================
 # PERSISTENCIA
 # ==============================
 
-def guardar_playlists():
+def guardar_playlists(playlists):
     with open(FICHEIRO_PLAYLISTS, "w", encoding="utf-8") as f:
         json.dump(playlists, f, indent=4, ensure_ascii=False)
 
@@ -41,20 +39,13 @@ def carregar_playlists():
     return {}
 
 
-def gerar_id_playlist():
-    global _contador_playlists
-    novo_id = "P" + str(_contador_playlists).zfill(3)
-    _contador_playlists += 1
-    return novo_id
-
-
 # ==============================
 # CREATE
 # ==============================
 
 def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_playlist):
-    playlists = carregar_playlists()
     from utilizadores import carregar_utilizadores, guardar_utilizadores
+    playlists = carregar_playlists()
     utilizadores = carregar_utilizadores()
     if not validar_nome(nome_playlist):
         return 500, "Nome invalido"
@@ -83,8 +74,9 @@ def criar_playlist(nome_playlist, id_utilizador, privacidade, descricao, capa_pl
     }
     playlists[id_playlist] = playlist
     utilizadores[id_utilizador]["playlists_publicas"].append(id_playlist)
-    guardar_playlists()
-    guardar_utilizadores()
+    guardar_playlists(playlists)
+    guardar_utilizadores(utilizadores)
+    logger.info("Playlist criada: " + id_playlist + " por " + id_utilizador)
     return 201, playlist
 
 
@@ -139,7 +131,8 @@ def atualizar_playlist(id_playlist, nome_playlist=None, privacidade=None, descri
             return 500, "Flag de remocao invalida. Use s ou n"
         playlists[id_playlist]["flag_remocao"] = flag_remocao == "s"
 
-    guardar_playlists()
+    guardar_playlists(playlists)
+    logger.info("Playlist atualizada: " + id_playlist)
     return 200, playlists[id_playlist]
 
 
@@ -148,18 +141,20 @@ def atualizar_playlist(id_playlist, nome_playlist=None, privacidade=None, descri
 # ==============================
 
 def adicionar_musica_playlist(id_playlist, id_musica):
-    playlists = carregar_playlists()
     from musica import carregar_musicas
+    playlists = carregar_playlists()
     musicas = carregar_musicas()
     if id_playlist not in playlists:
         return 404, "Playlist nao encontrada"
     if id_musica not in musicas:
         return 404, "Musica nao encontrada"
     if id_musica in playlists[id_playlist]["lista_ids"]:
+        logger.warning("Musica " + id_musica + " ja existe na playlist " + id_playlist)
         return 500, "Musica ja existente na playlist"
     playlists[id_playlist]["lista_ids"].append(id_musica)
     playlists[id_playlist]["ordem_musicas"].append(id_musica)
-    guardar_playlists()
+    guardar_playlists(playlists)
+    logger.info("Musica " + id_musica + " adicionada a playlist " + id_playlist)
     return 200, playlists[id_playlist]
 
 
@@ -176,7 +171,7 @@ def remover_musica_playlist(id_playlist, id_musica):
     playlists[id_playlist]["lista_ids"].remove(id_musica)
     if id_musica in playlists[id_playlist]["ordem_musicas"]:
         playlists[id_playlist]["ordem_musicas"].remove(id_musica)
-    guardar_playlists()
+    guardar_playlists(playlists)
     return 200, playlists[id_playlist]
 
 
@@ -189,7 +184,8 @@ def remover_playlist(id_playlist):
     if id_playlist not in playlists:
         return 404, "Playlist nao encontrada"
     del playlists[id_playlist]
-    guardar_playlists()
+    guardar_playlists(playlists)
+    logger.info("Playlist removida: " + id_playlist)
     return 200, id_playlist
 
 
@@ -198,6 +194,7 @@ def remover_playlist(id_playlist):
 # ==============================
 
 def seguir_playlist(id_utilizador, id_playlist):
+    from utilizadores import carregar_utilizadores
     playlists = carregar_playlists()
     utilizadores = carregar_utilizadores()
     if id_utilizador not in utilizadores:
@@ -207,5 +204,6 @@ def seguir_playlist(id_utilizador, id_playlist):
     if id_utilizador in playlists[id_playlist]["seguidores_playlist"]:
         return 500, "Utilizador ja segue esta playlist"
     playlists[id_playlist]["seguidores_playlist"].append(id_utilizador)
-    guardar_playlists()
+    guardar_playlists(playlists)
+    logger.info("Utilizador " + id_utilizador + " segue playlist " + id_playlist)
     return 200, playlists[id_playlist]

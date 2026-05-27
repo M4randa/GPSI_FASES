@@ -7,8 +7,8 @@
 
 import json
 import os
-from utilizadores import carregar_utilizadores
 from utils import (
+    configurar_logger,
     gerar_id_artista,
     validar_nome,
     validar_url,
@@ -26,9 +26,7 @@ from utils import (
 
 FICHEIRO_ARTISTAS = "artistas.json"
 
-artistas = {}
-
-_contador_artistas = 1
+logger = configurar_logger()
 
 
 # ==============================
@@ -36,6 +34,7 @@ _contador_artistas = 1
 # ==============================
 
 def guardar_artistas():
+    artistas = carregar_artistas()
     with open(FICHEIRO_ARTISTAS, "w", encoding="utf-8") as f:
         json.dump(artistas, f, indent=4, ensure_ascii=False)
 
@@ -45,13 +44,6 @@ def carregar_artistas():
         with open(FICHEIRO_ARTISTAS, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
-
-
-def gerar_id_artista():
-    global _contador_artistas
-    novo_id = "A" + str(_contador_artistas).zfill(3)
-    _contador_artistas += 1
-    return novo_id
 
 
 # ==============================
@@ -64,6 +56,7 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
         return 500, "Nome invalido. Minimo 2 caracteres"
     for a in artistas.values():
         if a["nome"].lower() == nome.lower():
+            logger.warning("Artista ja existe: " + nome)
             return 500, "Ja existe um artista com esse nome"
     if not validar_biografia(bio):
         return 500, "Biografia demasiado curta. Minimo 5 caracteres"
@@ -92,7 +85,9 @@ def criar_artista(nome, bio, imagem, imagem_capa, genero, verificado):
         "datas_concertos":  [],
         "escolha_artista":  "",
     }
-    guardar_artistas()
+    with open(FICHEIRO_ARTISTAS, "w", encoding="utf-8") as f:
+        json.dump(artistas, f, indent=4, ensure_ascii=False)
+    logger.info("Artista criado: " + id_artista)
     return 201, artistas[id_artista]
 
 
@@ -184,7 +179,9 @@ def atualizar_artista(id_artista, nome=None, bio=None, imagem=None, imagem_capa=
             return 500, "Escolha do artista nao pode estar vazia"
         artistas[id_artista]["escolha_artista"] = escolha_artista
 
-    guardar_artistas()
+    with open(FICHEIRO_ARTISTAS, "w", encoding="utf-8") as f:
+        json.dump(artistas, f, indent=4, ensure_ascii=False)
+    logger.info("Artista atualizado: " + id_artista)
     return 200, artistas[id_artista]
 
 
@@ -203,7 +200,8 @@ def adicionar_lancamento(id_artista, titulo, tipo, ano):
     if not validar_ano(ano):
         return 500, "Ano invalido. Use 4 digitos numericos entre 1900 e 2025"
     artistas[id_artista]["discografia"].append({"titulo": titulo, "tipo": tipo, "ano": ano})
-    guardar_artistas()
+    with open(FICHEIRO_ARTISTAS, "w", encoding="utf-8") as f:
+        json.dump(artistas, f, indent=4, ensure_ascii=False)
     return 200, artistas[id_artista]
 
 
@@ -222,7 +220,8 @@ def adicionar_top_faixa(id_artista, faixa):
     if faixa in artistas[id_artista]["top_faixas"]:
         return 500, "Esta faixa ja esta no top"
     artistas[id_artista]["top_faixas"].append(faixa)
-    guardar_artistas()
+    with open(FICHEIRO_ARTISTAS, "w", encoding="utf-8") as f:
+        json.dump(artistas, f, indent=4, ensure_ascii=False)
     return 200, artistas[id_artista]
 
 
@@ -235,7 +234,9 @@ def remover_artista(id_artista):
     if id_artista not in artistas:
         return 404, "Artista nao encontrado"
     del artistas[id_artista]
-    guardar_artistas()
+    with open(FICHEIRO_ARTISTAS, "w", encoding="utf-8") as f:
+        json.dump(artistas, f, indent=4, ensure_ascii=False)
+    logger.info("Artista removido: " + id_artista)
     return 200, id_artista
 
 
@@ -244,6 +245,7 @@ def remover_artista(id_artista):
 # ==============================
 
 def seguir_artista(id_utilizador, id_artista):
+    from utilizadores import carregar_utilizadores, guardar_utilizadores
     artistas = carregar_artistas()
     utilizadores = carregar_utilizadores()
     if id_utilizador not in utilizadores:
@@ -254,7 +256,8 @@ def seguir_artista(id_utilizador, id_artista):
         return 500, "O utilizador ja segue este artista"
     utilizadores[id_utilizador]["seguidos"].append(id_artista)
     artistas[id_artista]["seguidores"].append(id_utilizador)
-    guardar_artistas()
-    from utilizadores import guardar_utilizadores
-    guardar_utilizadores()
+    with open(FICHEIRO_ARTISTAS, "w", encoding="utf-8") as f:
+        json.dump(artistas, f, indent=4, ensure_ascii=False)
+    logger.info("Utilizador " + id_utilizador + " segue artista " + id_artista)
+    guardar_utilizadores(utilizadores)
     return 200, artistas[id_artista]
